@@ -9,6 +9,11 @@ US-100
 MCU 1MHz -> 1us
     6MHz/12 -> 2us
 
+MCU
+CLK     6MHz
+T0/1    6MHz/12 = 2us
+
+
 65536*2 = 131072us = 131ms
 
 // unit is mm
