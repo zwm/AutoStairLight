@@ -1,0 +1,316 @@
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE LCD1602
+OBJECT MODULE PLACED IN lcd1602.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE source\lcd1602.c ROM(COMPACT) BROWSE INCDIR(.\source) DEBUG OBJECTEXTEND PR
+                    -INT(.\lcd1602.lst) TABS(2) OBJECT(lcd1602.obj)
+
+line level    source
+
+   1          #include "lcd1602.h"
+   2          
+   3          //**************************************************
+   4          //* Internal Func: busy detect
+   5          //**************************************************
+   6          static void LcdWait (void)
+   7          {
+   8   1          bit ebk;
+   9   1          ebk = EA;
+  10   1          EA = 0;
+  11   1      
+  12   1          // start read
+  13   1          PIN_1602_RS     = 0;
+  14   1          PIN_1602_RW     = 1;
+  15   1          PIN_1602_EN     = 1;
+  16   1          DelayUs (0);
+  17   1      
+  18   1          while (1)
+  19   1          {
+  20   2              PIN_1602_DATA   = 0xFF;
+  21   2              PIN_1602_EN     = 0;
+  22   2              DelayUs (0);
+  23   2              PIN_1602_EN     = 1;
+  24   2              DelayUs (0);
+  25   2              // busy_flag = (bit)(PIN_1602_DATA & 0x80) ;
+  26   2              if (!(PIN_1602_DATA & 0x80))
+  27   2              {
+  28   3                  break;
+  29   3              }
+  30   2          DelayUs (10); 
+  31   2          }  
+  32   1      
+  33   1          PIN_1602_EN     = 0;
+  34   1          EA = ebk;
+  35   1      
+  36   1      }
+  37          
+  38          //**************************************************
+  39          //* Internal Func: write command
+  40          //**************************************************
+  41          void LcdWriteCmd (unsigned char cmd)
+  42          {
+  43   1          bit ebk;
+  44   1      
+  45   1          // check
+  46   1          LcdWait();
+  47   1      
+  48   1          ebk = EA;
+  49   1          EA = 0;
+  50   1      
+  51   1          // write cmd
+  52   1          PIN_1602_RS     = 0;
+  53   1          PIN_1602_RW     = 0;
+  54   1          PIN_1602_EN     = 0;
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 2   
+
+  55   1          PIN_1602_DATA   = cmd;
+  56   1      
+  57   1          // pulse
+  58   1          PIN_1602_EN     = 1;
+  59   1          DelayUs (0);
+  60   1          PIN_1602_EN     = 0;
+  61   1      
+  62   1          EA = ebk;
+  63   1      
+  64   1          DelayUs (10);
+  65   1      }
+  66          
+  67          //**************************************************
+  68          //* Internal Func: write data
+  69          //**************************************************
+  70          void LcdWriteData (unsigned char dt)
+  71          {
+  72   1          bit ebk;
+  73   1      
+  74   1          // check
+  75   1          LcdWait();
+  76   1      
+  77   1          ebk = EA;
+  78   1          EA = 0;
+  79   1      
+  80   1          // write cmd
+  81   1          PIN_1602_RS     = 1;
+  82   1          PIN_1602_RW     = 0;
+  83   1          PIN_1602_EN     = 0;
+  84   1          PIN_1602_DATA   = dt;
+  85   1          DelayUs (0);
+  86   1      
+  87   1          // pulse
+  88   1          PIN_1602_EN     = 1;
+  89   1          DelayUs (0);
+  90   1          PIN_1602_EN     = 0;
+  91   1      
+  92   1          EA = ebk;
+  93   1      
+  94   1          DelayUs (10);
+  95   1      }
+  96          
+  97          //**************************************************
+  98          //* Internal Func: read status
+  99          //**************************************************
+ 100          unsigned char LcdReadStatus (void)
+ 101          {
+ 102   1          unsigned char ret;
+ 103   1          bit ebk;
+ 104   1          LcdWait ();
+ 105   1      
+ 106   1          ebk = EA;
+ 107   1          EA = 0;
+ 108   1      
+ 109   1          // start read
+ 110   1          PIN_1602_RS     = 0;
+ 111   1          PIN_1602_RW     = 1;
+ 112   1          PIN_1602_EN     = 1;
+ 113   1          PIN_1602_DATA   = 0xFF;
+ 114   1          DelayUs (0);
+ 115   1          ret = PIN_1602_DATA;
+ 116   1      
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 3   
+
+ 117   1          PIN_1602_EN     = 0;
+ 118   1          PIN_1602_RW     = 0;
+ 119   1      
+ 120   1          EA = ebk;
+ 121   1      
+ 122   1        return ret;
+ 123   1      }
+ 124          
+ 125          //**************************************************
+ 126          //* Internal Func: read data
+ 127          //**************************************************
+ 128          unsigned char LcdReadData (void)
+ 129          {
+ 130   1          unsigned char ret;
+ 131   1          bit ebk;
+ 132   1          LcdWait ();
+ 133   1      
+ 134   1          ebk = EA;
+ 135   1          EA = 0;
+ 136   1      
+ 137   1          // start read
+ 138   1          PIN_1602_RS     = 1;
+ 139   1          PIN_1602_RW     = 1;
+ 140   1          PIN_1602_EN     = 1;
+ 141   1          PIN_1602_DATA   = 0xFF;
+ 142   1          _nop_();    _nop_(); 
+ 143   1          ret = PIN_1602_DATA;
+ 144   1      
+ 145   1          PIN_1602_EN     = 0;
+ 146   1          PIN_1602_RW     = 0;
+ 147   1      
+ 148   1          EA = ebk;
+ 149   1      
+ 150   1        return ret;
+ 151   1      }
+ 152          
+ 153          //**************************************************
+ 154          //* Internal Func: AC inc&dec
+ 155          //**************************************************
+ 156          void LcdAcInc (void)
+ 157          {
+ 158   1          LcdWriteCmd (LCD1602_CMD_MM_14);
+ 159   1          DelayUs (50);
+ 160   1      }
+ 161          
+ 162          void LcdAcDec (void)
+ 163          {
+ 164   1          LcdWriteCmd (LCD1602_CMD_MM_10);
+ 165   1          DelayUs (50);
+ 166   1      }
+ 167          
+ 168          //**************************************************
+ 169          //* Func: AC inc&dec
+ 170          //**************************************************
+ 171          void LcdWriteOneCGRAM (unsigned char addr, char *pval)
+ 172          {
+ 173   1          unsigned char i;
+ 174   1          LcdWriteCmd (0x40 + (addr << 3));
+ 175   1          for (i = 0; i < 8; i++)
+ 176   1              LcdWriteData (pval[i]);
+ 177   1      }
+ 178          
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 4   
+
+ 179          //**************************************************
+ 180          //* Func: set position
+ 181          //**************************************************
+ 182          void LcdSetPos (unsigned char x, unsigned char y)
+ 183          {
+ 184   1          // 1. format parameter
+ 185   1          x = x & 0x3F;
+ 186   1          y = y & 0x01;
+ 187   1      
+ 188   1          // 2. cal ddram addr
+ 189   1          if (y) x |= 0x40;
+ 190   1      
+ 191   1          // 3. write cmd
+ 192   1          LcdWriteCmd (x|0x80);
+ 193   1          DelayUs (50);
+ 194   1      }
+ 195          
+ 196          //**************************************************
+ 197          //* Func: display char
+ 198          //**************************************************
+ 199          void LcdDispChar (unsigned char x, unsigned char y, char c)
+ 200          {
+ 201   1          LcdSetPos (x, y);
+ 202   1          LcdWriteData (c);
+ 203   1      }
+ 204          
+ 205          //**************************************************
+ 206          //* Func: display string
+ 207          //**************************************************
+ 208          void LcdDispString (unsigned char x, unsigned char y, char *ps)
+ 209          {
+ 210   1          LcdSetPos (x, y);
+ 211   1          while (*ps != '\0')
+ 212   1        {
+ 213   2              LcdWriteData (*ps);
+ 214   2          ps++;
+ 215   2          }
+ 216   1      }
+ 217          
+ 218          //**************************************************
+ 219          //* Func: display BCD
+ 220          //**************************************************
+ 221          void LcdDispBCD (unsigned char x, unsigned char y, unsigned char bcd, unsigned char mode)
+ 222          {
+ 223   1          // higher byte
+ 224   1          LcdSetPos (x, y);
+ 225   1          if ((bcd & 0xF0) == 0x00)
+ 226   1          {
+ 227   2              if ((mode & 0xF0) == 0)
+ 228   2                  LcdWriteData ('0');
+ 229   2              else
+ 230   2                  LcdWriteData (' ');
+ 231   2          }
+ 232   1          else
+ 233   1          {
+ 234   2              LcdWriteData (((bcd >> 4) & 0x0F) + '0');
+ 235   2          }
+ 236   1      
+ 237   1          // lower byte
+ 238   1          LcdSetPos ((x + 1), y);
+ 239   1          if ((bcd & 0x0F) == 0x00)
+ 240   1          {
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 5   
+
+ 241   2              if ((mode & 0x0F) == 0)
+ 242   2                  LcdWriteData ('0');
+ 243   2              else
+ 244   2                  LcdWriteData (' ');
+ 245   2          }
+ 246   1          else
+ 247   1          {
+ 248   2              LcdWriteData (((bcd) & 0x0F) + '0');
+ 249   2          }
+ 250   1      }
+ 251          
+ 252          //******************************************************
+ 253          //* LCD Init
+ 254          //******************************************************
+ 255          void LcdInit (void)
+ 256          {
+ 257   1          // 1. Bus Mode 38: 8b, 2 lines
+ 258   1          DelayMs (50);
+ 259   1          LcdWriteCmd (LCD1602_CMD_BM_38);        // 39us
+ 260   1          DelayUs (100);
+ 261   1      
+ 262   1          // 5. Display Mode 0C: open screen, no cursor, no splash
+ 263   1          LcdWriteCmd (LCD1602_CMD_DM_0C);
+ 264   1          DelayUs (100);
+ 265   1      
+ 266   1          // 2. Display Mode 08: close screen
+ 267   1          //LcdWriteCmd (LCD1602_CMD_DM_08);      // 39us
+ 268   1          //DelayUs (100);
+ 269   1      
+ 270   1          // 3. Clear Screen 01
+ 271   1          LcdWriteCmd (LCD1602_CMD_CLS);          // 1.53ms
+ 272   1          DelayMs (10);
+ 273   1      
+ 274   1          // 4. Enter Mode 06: addr+1, no scroll
+ 275   1          LcdWriteCmd (LCD1602_CMD_EM_06);        // 39us
+ 276   1          DelayUs (100);
+ 277   1      
+ 278   1          // 5. Display Mode 0C: open screen, no cursor, no splash
+ 279   1          //LcdWriteCmd (LCD1602_CMD_DM_0C);
+ 280   1          //DelayUs (250);
+ 281   1      }
+ 282          
+ 283          //**************************************************
+ 284          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    465    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      14
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       5
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

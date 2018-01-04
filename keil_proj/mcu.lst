@@ -1,0 +1,210 @@
+C51 COMPILER V9.52.0.0   MCU                                                               01/04/2018 23:55:38 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MCU
+OBJECT MODULE PLACED IN mcu.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE source\mcu.c ROM(COMPACT) BROWSE INCDIR(.\source) DEBUG OBJECTEXTEND PRINT(
+                    -.\mcu.lst) TABS(2) OBJECT(mcu.obj)
+
+line level    source
+
+   1          //*********************************************************
+   2          //  File Name   : mcu.c
+   3          //  Created On  : 201801041429
+   4          //  Author      : Ming
+   5          //  Description : STC15F204EA related function
+   6          //*********************************************************
+   7          #include  "mcu.h"
+   8          
+   9          //---------------------------------------------------------------------------
+  10          // INIT MCU
+  11          //---------------------------------------------------------------------------
+  12          void mcu_init (void)
+  13          {
+  14   1          // STC15F204EA Configure
+  15   1          //************************************
+  16   1          //* T0x12, T1x12
+  17   1          //************************************
+  18   1          AUXR        = 0x00;
+  19   1          //************************************
+  20   1          //* MCLKO_S1, MCLKO_S0, ADRJ, Tx_Rx, MCLKO_2
+  21   1          //* CLK_S2, CLK_S1, CLK_S0
+  22   1          //*     CLK do not output;
+  23   1          //*     Uart work mode: normal
+  24   1          //*     Main_CLK: div1
+  25   1          //************************************
+  26   1          CLK_DIV     = 0x00;
+  27   1          //************************************
+  28   1          //* WDT_FLAG, EN_WDT, CLR_WDT, IDLE_WDT
+  29   1          //* PS2, PS1, PS0
+  30   1          //*     WDT: disable
+  31   1          //************************************
+  32   1          WDT_CONTR   = 0x00;
+  33   1          //************************************
+  34   1          //* SMOD, SMOD0, LVDF, POF, GF1, GF0
+  35   1          //* PD, DIL
+  36   1          //************************************
+  37   1          PCON        = 0x00;
+  38   1          //************************************
+  39   1          //* P1, P2, P3, I/O mode
+  40   1          //*     dual-dir
+  41   1          //************************************
+  42   1          P0M1        = 0x00;
+  43   1          P0M0        = 0x00;
+  44   1          P1M1        = 0x00;
+  45   1          P1M0        = 0x00;
+  46   1          P2M1        = 0x00;
+  47   1          P2M0        = 0x00;
+  48   1          P3M1        = 0x00;
+  49   1          P3M0        = 0x00;
+  50   1          //************************************
+  51   1          // interrupt
+  52   1          IE = 0x00;
+  53   1          TCON = 0x00;
+  54   1          mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
+C51 COMPILER V9.52.0.0   MCU                                                               01/04/2018 23:55:38 PAGE 2   
+
+  55   1          mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
+  56   1          mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
+  57   1          mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
+  58   1      }
+  59          
+  60          //---------------------------------------------------------------------------
+  61          // SET Interrupt INT0 and INT1
+  62          //---------------------------------------------------------------------------
+  63          void mcu_set_exint (unsigned char idx, unsigned char mode)
+  64          {
+  65   1          // disable interrupt
+  66   1          bit ea_bak;
+  67   1          ea_bak = EA;
+  68   1          EA = 0;
+  69   1          if (idx == INT_IDX_0)
+  70   1          {
+  71   2              EX0 = 0;        // disable int0
+  72   2              IE0 = 0;        // clear int0 flag
+  73   2              IT0 = 1;        // int0 falling edge trigger int
+  74   2              if (mode == INT_MOD_START)
+  75   2              {
+  76   3                  EX0 = 1;        // enable int0
+  77   3              }
+  78   2              else if (mode == INT_MOD_STOP)
+  79   2              {
+  80   3              }
+  81   2          }
+  82   1          else if (idx == INT_IDX_1)
+  83   1          {
+  84   2              EX1 = 0;        // disable int1
+  85   2              IE1 = 0;        // clear int1 flag
+  86   2              IT1 = 1;        // int1 falling edge trigger int
+  87   2              if (mode == INT_MOD_START)
+  88   2              {
+  89   3                  EX1 = 1;        // enable int1
+  90   3              }
+  91   2              else if (mode == INT_MOD_STOP)
+  92   2              {
+  93   3              }
+  94   2          }
+  95   1          EA = ea_bak;
+  96   1      }
+  97          
+  98          //---------------------------------------------------------------------------
+  99          // SET T0 and T1
+ 100          //---------------------------------------------------------------------------
+ 101          void mcu_set_tmr (unsigned char idx, unsigned char mode)
+ 102          {
+ 103   1          // init reg
+ 104   1          bit ea_bak;
+ 105   1          ea_bak = EA;
+ 106   1          EA = 0;     // disable all interrupt
+ 107   1          // T0
+ 108   1          if (idx == TMR_IDX_0)
+ 109   1          {
+ 110   2              TR0 = 0;    // stop T0
+ 111   2              ET0 = 0;    // disable T0 overflow interrupt
+ 112   2              TF0 = 0;    // clear T0 overflow interrupt flag
+ 113   2              // conf timer
+ 114   2              if (mode == TMR_MOD_CAP)
+ 115   2              {
+ 116   3                  TMOD = (TMOD & 0xF0) + 0x08;    // GATE=1, C/T=0, M1=0, M0=0
+C51 COMPILER V9.52.0.0   MCU                                                               01/04/2018 23:55:38 PAGE 3   
+
+ 117   3                  TL0 = 0;    // reset TL0
+ 118   3                  TH0 = 0;    // reset TH0
+ 119   3              }
+ 120   2              else if (mode == TMR_MOD_50MS)
+ 121   2              {
+ 122   3                  TMOD = (TMOD & 0xF0) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
+ 123   3                  TL0 = TL_INIT_50MS;     // load TL0
+ 124   3                  TH0 = TH_INIT_50MS;     // load TH0
+ 125   3              }
+ 126   2              else if (mode == TMR_MOD_10MS)
+ 127   2              {
+ 128   3                  TMOD = (TMOD & 0xF0) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
+ 129   3                  TL0 = TL_INIT_10MS;     // load TL0
+ 130   3                  TH0 = TH_INIT_10MS;     // load TH0
+ 131   3              }
+ 132   2              else if (mode == TMR_MOD_STOP)
+ 133   2              {
+ 134   3                  EA = ea_bak;    // enable all interrupt
+ 135   3                  return;
+ 136   3              }
+ 137   2              // set reg
+ 138   2              TF0 = 0;        // clear T0 overflow interrupt flag
+ 139   2              ET0 = 1;        // enable T0 overflow interrupt
+ 140   2              EA = ea_bak;    // enable all interrupt
+ 141   2              TR0 = 1;        // start T0
+ 142   2          }
+ 143   1          // T1
+ 144   1          else if (idx == TMR_IDX_1)
+ 145   1          {
+ 146   2              TR1 = 0;    // stop T1
+ 147   2              ET1 = 0;    // disable T1 overflow interrupt
+ 148   2              TF1 = 0;    // clear T1 overflow interrupt flag
+ 149   2              // conf timer
+ 150   2              if (mode == TMR_MOD_CAP)
+ 151   2              {
+ 152   3                  TMOD = (TMOD & 0x0F) + 0x80;    // GATE=1, C/T=0, M1=0, M0=0
+ 153   3                  TL1 = 0;                // reset TL1
+ 154   3                  TH1 = 0;                // reset TH1
+ 155   3              }
+ 156   2              else if (mode == TMR_MOD_50MS)
+ 157   2              {
+ 158   3                  TMOD = (TMOD & 0x0F) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
+ 159   3                  TL1 = TL_INIT_50MS;     // load TL1
+ 160   3                  TH1 = TH_INIT_50MS;     // load TH1
+ 161   3              }
+ 162   2              else if (mode == TMR_MOD_10MS)
+ 163   2              {
+ 164   3                  TMOD = (TMOD & 0x0F) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
+ 165   3                  TL1 = TL_INIT_10MS;     // load TL1
+ 166   3                  TH1 = TH_INIT_10MS;     // load TH1
+ 167   3              }
+ 168   2              else if (mode == TMR_MOD_STOP)
+ 169   2              {
+ 170   3                  EA = ea_bak;    // enable all interrupt
+ 171   3                  return;
+ 172   3              }
+ 173   2              // set reg
+ 174   2              TF1 = 0;        // clear T1 overflow interrupt flag
+ 175   2              ET1 = 1;        // enable T1 overflow interrupt
+ 176   2              EA = ea_bak;    // enable all interrupt
+ 177   2              TR1 = 1;        // start T1
+ 178   2          }
+C51 COMPILER V9.52.0.0   MCU                                                               01/04/2018 23:55:38 PAGE 4   
+
+ 179   1      }
+ 180          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    255    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
