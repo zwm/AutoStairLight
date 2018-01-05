@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 1   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/05/2018 12:14:34 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE LCD1602
@@ -62,7 +62,7 @@ line level    source
   52   1          PIN_1602_RS     = 0;
   53   1          PIN_1602_RW     = 0;
   54   1          PIN_1602_EN     = 0;
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 2   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/05/2018 12:14:34 PAGE 2   
 
   55   1          PIN_1602_DATA   = cmd;
   56   1      
@@ -126,7 +126,7 @@ line level    source
  114   1          DelayUs (0);
  115   1          ret = PIN_1602_DATA;
  116   1      
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 3   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/05/2018 12:14:34 PAGE 3   
 
  117   1          PIN_1602_EN     = 0;
  118   1          PIN_1602_RW     = 0;
@@ -190,7 +190,7 @@ line level    source
  176   1              LcdWriteData (pval[i]);
  177   1      }
  178          
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 4   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/05/2018 12:14:34 PAGE 4   
 
  179          //**************************************************
  180          //* Func: set position
@@ -254,7 +254,7 @@ line level    source
  238   1          LcdSetPos ((x + 1), y);
  239   1          if ((bcd & 0x0F) == 0x00)
  240   1          {
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/04/2018 23:55:37 PAGE 5   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/05/2018 12:14:34 PAGE 5   
 
  241   2              if ((mode & 0x0F) == 0)
  242   2                  LcdWriteData ('0');
