@@ -26,3 +26,18 @@ T0/1    6MHz/12 = 2us
 T0和T1分别连接两个计数器，工作时，T0测量模式，T1定时模式，然后T1测量模式，T0定时模式，完成后，总时间最长54ms。
 
 T0测量开始，T1定时50ms，T1测量开始，T0定时50ms，延时150ms，如此循环即可！
+
+
+Joy_sys平台测试
+SRC     PIN     JOY         Connector
+INT0    P3.2    SWITCH_GM   None
+INT1    P3.3    KEY1        J2_4
+GPIO    P3.4    KEY2        J2_5
+GPIO    P3.7    KEY3        J2_6
+
+US-100 5V 电平工作方式
+
+Connection
+JOY_SYS     US-100      DESCRIPTION
+P3.4        Pin_2       Trigger
+P3.3        Pin_3       Echo
