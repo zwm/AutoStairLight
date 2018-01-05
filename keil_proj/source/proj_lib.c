@@ -3,7 +3,6 @@
 //---------------------------------------------------------------------------
 // Global Variable Define
 //---------------------------------------------------------------------------
-//uint16  time_ms;
 u16  time_ms;
 u16  time_qua;
 u16  time_sec;
@@ -19,11 +18,18 @@ STRUCT_INT_CNT data st_t1;
 STRUCT_INT_CNT data *st_p;
 
 //---------------------------------------------------------------------------
-// Global Variable Define
+// EN_US0 : enable untrasonic 0
+// EN_US1 : enable untrasonic 1
 //---------------------------------------------------------------------------
-unsigned char inc_check (STRUCT_INT_CNT *p)
+//#define EN_US0      1
+#define EN_US1      1
+
+//---------------------------------------------------------------------------
+// Check struct increased by interrupt
+//---------------------------------------------------------------------------
+u8 inc_check (STRUCT_INT_CNT *p)
 {
-    unsigned char cur;
+    u8 cur;
     cur = p->cnt;
     if (cur > p->bak)       // normal increase
     {
@@ -42,6 +48,9 @@ unsigned char inc_check (STRUCT_INT_CNT *p)
     return cur;
 }
 
+//---------------------------------------------------------------------------
+// Initial System
+//---------------------------------------------------------------------------
 void sys_init (void)
 {
     // device init
@@ -74,9 +83,13 @@ void sys_init (void)
     EA = 1;
 }
 
+//---------------------------------------------------------------------------
+// Trigger one measurement of untrasonic 0
+//---------------------------------------------------------------------------
+#ifdef EN_US0
 void fsm_tus0_proc(void)
 {
-    unsigned char i, j;
+    u8 i, j;
     // set 
     time_ms = 0;
     mcu_set_exint (INT_IDX_0, INT_MOD_START);
@@ -138,9 +151,21 @@ void fsm_tus0_proc(void)
         }
     }
 }
+#else
+void fsm_tus0_proc(void)
+{
+    time_ms = 0;
+    fsm = FSM_TUS1;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Trigger one measurement of untrasonic 1
+//---------------------------------------------------------------------------
+#ifdef EN_US1
 void fsm_tus1_proc(void)
 {
-    unsigned char i, j;
+    u8 i, j;
     // set 
     mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
     mcu_set_exint (INT_IDX_1, INT_MOD_START);
@@ -201,10 +226,21 @@ void fsm_tus1_proc(void)
         }
     }
 }
+#else
+void fsm_tus1_proc(void)
+{
+    time_ms = time_ms;
+    fsm = FSM_WAIT;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Wait for 250ms, and process the result of measurement
+//---------------------------------------------------------------------------
 void fsm_wait_proc(void)
 {
-    uchar i, j;
-    uint16 len;
+    u8 i, j;
+    u16 len;
     // 250ms timer
     mcu_set_tmr   (TMR_IDX_0, TMR_MOD_10MS);
     while (1)
@@ -218,11 +254,9 @@ void fsm_wait_proc(void)
             break;
         }
     }
-
     // frash flag
     us0_frash = 0;
     us1_frash = 0;
-
     // refrash display each second
     if (time_qua == 4)
     {
@@ -282,10 +316,12 @@ void fsm_wait_proc(void)
     fsm = FSM_TUS0;
 }
 
-// fall in error state
+//---------------------------------------------------------------------------
+// Display Error Message
+//---------------------------------------------------------------------------
 void fsm_erro_proc(void)
 {
-    unsigned char i;
+    u8 i;
     // 1. clear screen
     for (i=0; i<16; i++)
         LcdDispChar (0, i, ' ');

@@ -1,5 +1,5 @@
-#ifndef	__MCU__
-#define	__MCU__
+#ifndef	__MCU_H__
+#define	__MCU_H__
 
 #include "stc15fxxxx.h"
 #include "proj_lib.h"

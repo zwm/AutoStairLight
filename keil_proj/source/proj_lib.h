@@ -1,5 +1,5 @@
-#ifndef __PROJ_LIB__
-#define __PROJ_LIB__
+#ifndef __PROJ_LIB_H__
+#define __PROJ_LIB_H__
 
 #include "mcu.h"
 #include "delay.h"
@@ -49,15 +49,14 @@
 #define INT_MOD_STOP    1
 
 typedef struct{
-    unsigned char cnt;
-    unsigned char bak;
+    u8 cnt;
+    u8 bak;
 } STRUCT_INT_CNT;
 
 
 //---------------------------------------------------------------------------
 // Global Variable Declearation
 //---------------------------------------------------------------------------
-//extern uint16  time_ms;
 extern u16  time_ms;
 extern u16  time_qua;
 extern u16  time_sec;
@@ -72,16 +71,11 @@ extern STRUCT_INT_CNT data st_t0;
 extern STRUCT_INT_CNT data st_t1;
 extern STRUCT_INT_CNT data *st_p;
 
-unsigned char inc_check(STRUCT_INT_CNT *p);
+u8 inc_check(STRUCT_INT_CNT *p);
 void sys_init (void);
 void fsm_tus0_proc(void);
 void fsm_tus1_proc(void);
 void fsm_wait_proc(void);
 void fsm_erro_proc(void);
-
-
-
-
-
 
 #endif

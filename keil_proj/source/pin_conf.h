@@ -33,8 +33,8 @@ sbit sbit_pin_rtc_irq               =   P3^2;
 //******************************************************
 sbit sbit_pin_sht1x_data            =   P3^1;
 sbit sbit_pin_sht1x_clk             =   P3^0;
-sbit us0_trig                       =   P3^6;
-sbit us1_trig                       =   P3^7;
+sbit us0_trig                       =   P3^7;
+sbit us1_trig                       =   P3^4;
 //******************************************************
 
 #endif
