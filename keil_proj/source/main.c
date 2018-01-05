@@ -5,6 +5,10 @@ void main (void)
     // init
     DelayMs (100);
     sys_init ();
+#ifdef PRINT_DEBUG
+    LcdDispChar (0, 10, 'i');
+#endif
+    
 
     // main
     while (1)

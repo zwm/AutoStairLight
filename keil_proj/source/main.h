@@ -10,9 +10,12 @@
 #include "interrupt_service.h"
 //******************************************************
 
-
 // global control
+// To enable keil simulation, change lcd1602.c L20, it will not block simulation
+// When download to hardware, must remove this definition! 201801051341
 #define SIMULATE_ONLY
+// Print debug info to LCD, it's better to keep it!
+#define PRINT_DEBUG
 //---------------------------------------------------------------------------
 // EN_US0 : enable untrasonic 0
 // EN_US1 : enable untrasonic 1
