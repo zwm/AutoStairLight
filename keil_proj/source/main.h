@@ -10,4 +10,14 @@
 #include "interrupt_service.h"
 //******************************************************
 
+
+// global control
+#define SIMULATE_ONLY
+//---------------------------------------------------------------------------
+// EN_US0 : enable untrasonic 0
+// EN_US1 : enable untrasonic 1
+//---------------------------------------------------------------------------
+//#define EN_US0      1
+#define EN_US1      1
+
 #endif

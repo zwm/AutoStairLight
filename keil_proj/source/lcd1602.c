@@ -17,7 +17,12 @@ static void LcdWait (void)
 
     while (1)
     {
+//        PIN_1602_DATA   = 0xFF;
+#ifdef SIMULATE_ONLY
+        PIN_1602_DATA   = 0x7F;
+#else
         PIN_1602_DATA   = 0xFF;
+#endif
         PIN_1602_EN     = 0;
         DelayUs (0);
         PIN_1602_EN     = 1;

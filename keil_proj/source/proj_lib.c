@@ -18,13 +18,6 @@ STRUCT_INT_CNT data st_t1;
 STRUCT_INT_CNT data *st_p;
 
 //---------------------------------------------------------------------------
-// EN_US0 : enable untrasonic 0
-// EN_US1 : enable untrasonic 1
-//---------------------------------------------------------------------------
-//#define EN_US0      1
-#define EN_US1      1
-
-//---------------------------------------------------------------------------
 // Check struct increased by interrupt
 //---------------------------------------------------------------------------
 u8 inc_check (STRUCT_INT_CNT *p)
@@ -33,13 +26,13 @@ u8 inc_check (STRUCT_INT_CNT *p)
     cur = p->cnt;
     if (cur > p->bak)       // normal increase
     {
-        p->bak = cur;
         cur = cur - p->bak;
+        p->bak = p->cnt;
     }
     else if (cur < p->bak)  // overflow increase
     {
-        p->bak = cur;
         cur = 256 - p->bak + cur;
+        p->bak = p->cnt;
     }
     else                    // no increase
     {

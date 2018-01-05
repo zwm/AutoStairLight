@@ -4,6 +4,7 @@
 #include "mcu.h"
 #include "delay.h"
 #include "lcd1602.h"
+#include "main.h"
 
 // FSM
 // 0 : FSM_TUS0
