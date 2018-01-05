@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   MCU                                                               01/05/2018 12:35:22 PAGE 1   
+C51 COMPILER V9.52.0.0   MCU                                                               01/05/2018 20:03:12 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MCU
@@ -62,7 +62,7 @@ line level    source
   52   1          IE = 0x00;
   53   1          TCON = 0x00;
   54   1          mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
-C51 COMPILER V9.52.0.0   MCU                                                               01/05/2018 12:35:22 PAGE 2   
+C51 COMPILER V9.52.0.0   MCU                                                               01/05/2018 20:03:12 PAGE 2   
 
   55   1          mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
   56   1          mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
@@ -126,7 +126,7 @@ line level    source
  114   2              if (mode == TMR_MOD_CAP)
  115   2              {
  116   3                  TMOD = (TMOD & 0xF0) + 0x08;    // GATE=1, C/T=0, M1=0, M0=0
-C51 COMPILER V9.52.0.0   MCU                                                               01/05/2018 12:35:22 PAGE 3   
+C51 COMPILER V9.52.0.0   MCU                                                               01/05/2018 20:03:12 PAGE 3   
 
  117   3                  TL0 = 0;    // reset TL0
  118   3                  TH0 = 0;    // reset TH0
@@ -190,7 +190,7 @@ line level    source
  176   2              EA = ea_bak;    // enable all interrupt
  177   2              TR1 = 1;        // start T1
  178   2          }
-C51 COMPILER V9.52.0.0   MCU                                                               01/05/2018 12:35:22 PAGE 4   
+C51 COMPILER V9.52.0.0   MCU                                                               01/05/2018 20:03:12 PAGE 4   
 
  179   1      }
  180          

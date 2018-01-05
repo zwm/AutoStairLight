@@ -240,10 +240,13 @@ void fsm_wait_proc(void)
     {
         i = inc_check (&st_t0);
         time_ms = time_ms + i*10;
-        if (time_ms > 250)
+//        if (time_ms > 250)
+        if (time_ms > 1000)
         {
+            time_ms = 0;
             mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-            time_qua = time_qua + 1;
+//            time_qua = time_qua + 1;
+            time_qua = 4;
             break;
         }
     }
@@ -270,7 +273,8 @@ void fsm_wait_proc(void)
         LcdDispChar (1, 13, i);
         LcdDispChar (1, 14, j);
         // display us0
-        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
+//        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
+        len = us0_meas[0]*2;    // time in us
         len = len/2;        // single trace
         len = len/1000;     // time in ms
         len = len * 340;    // length in mm
@@ -288,7 +292,8 @@ void fsm_wait_proc(void)
         LcdDispChar (0, 3, i);
         LcdDispChar (0, 4, j);
         // display us1
-        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
+//        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
+        len = us1_meas[0]*2;    // time in us
         len = len/2;        // single trace
         len = len/1000;     // time in ms
         len = len * 340;    // length in mm
