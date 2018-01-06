@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/05/2018 20:03:12 PAGE 1   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 19:21:13 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE PROJ_LIB
@@ -57,12 +57,12 @@ line level    source
   47          void sys_init (void)
   48          {
   49   1          // device init
-  50   1          LcdInit ();
-  51   1          mcu_init ();
+  50   1          mcu_init ();
+  51   1          LcdInit ();
   52   1          // parameter init
   53   1          st_x0.cnt = 0;
   54   1          st_x0.bak = 0;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/05/2018 20:03:12 PAGE 2   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 19:21:13 PAGE 2   
 
   55   1          st_x1.cnt = 0;
   56   1          st_x1.bak = 0;
@@ -126,7 +126,7 @@ line level    source
                               }
                               us0_meas[0] = (TH0<<8) + TL0;
                               us0_frash = 1;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/05/2018 20:03:12 PAGE 3   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 19:21:13 PAGE 3   
 
                               // record time
                               time_ms = time_ms + (((TH1<<8) + TL1)*2)/1000;
@@ -190,7 +190,7 @@ line level    source
  176   2              if (i>0)
  177   2              {
  178   3                  // stop
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/05/2018 20:03:12 PAGE 4   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 19:21:13 PAGE 4   
 
  179   3                  mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
  180   3                  mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
@@ -254,7 +254,7 @@ line level    source
  238   1          mcu_set_tmr   (TMR_IDX_0, TMR_MOD_10MS);
  239   1          while (1)
  240   1          {
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/05/2018 20:03:12 PAGE 5   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 19:21:13 PAGE 5   
 
  241   2              i = inc_check (&st_t0);
  242   2              time_ms = time_ms + i*10;
@@ -268,101 +268,102 @@ line level    source
  250   3                  break;
  251   3              }
  252   2          }
- 253   1          // frash flag
- 254   1          us0_frash = 0;
- 255   1          us1_frash = 0;
- 256   1          // refrash display each second
- 257   1          if (time_qua == 4)
- 258   1          {
- 259   2              time_qua = 0;
- 260   2              time_sec = time_sec + 1;
- 261   2              // display time
- 262   2              i = time_sec/10000 + '0';
- 263   2              j = time_sec%10000;
- 264   2              LcdDispChar (1, 10, i);
- 265   2              i = j/1000 + '0';
- 266   2              j = j%1000;
- 267   2              LcdDispChar (1, 11, i);
- 268   2              i = j/100 + '0';
- 269   2              j = j%100;
- 270   2              LcdDispChar (1, 12, i);
- 271   2              i = j/10 + '0';
- 272   2              j = j%10;
- 273   2              LcdDispChar (1, 13, i);
- 274   2              LcdDispChar (1, 14, j);
- 275   2              // display us0
- 276   2      //        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
- 277   2              len = us0_meas[0]*2;    // time in us
- 278   2              len = len/2;        // single trace
- 279   2              len = len/1000;     // time in ms
- 280   2              len = len * 340;    // length in mm
- 281   2              i = len/10000 + '0';
- 282   2              j = len%10000;
- 283   2              LcdDispChar (0, 0, i);
- 284   2              i = j/1000 + '0';
- 285   2              j = j%1000;
- 286   2              LcdDispChar (0, 1, i);
- 287   2              i = j/100 + '0';
- 288   2              j = j%100;
- 289   2              LcdDispChar (0, 2, i);
- 290   2              i = j/10 + '0';
- 291   2              j = j%10;
- 292   2              LcdDispChar (0, 3, i);
- 293   2              LcdDispChar (0, 4, j);
- 294   2              // display us1
- 295   2      //        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
- 296   2              len = us1_meas[0]*2;    // time in us
- 297   2              len = len/2;        // single trace
- 298   2              len = len/1000;     // time in ms
- 299   2              len = len * 340;    // length in mm
- 300   2              i = len/10000 + '0';
- 301   2              j = len%10000;
- 302   2              LcdDispChar (1, 0, i);
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/05/2018 20:03:12 PAGE 6   
+ 253   1          LCD_BKL = ~LCD_BKL;
+ 254   1          // frash flag
+ 255   1          us0_frash = 0;
+ 256   1          us1_frash = 0;
+ 257   1          // refrash display each second
+ 258   1          if (time_qua == 4)
+ 259   1          {
+ 260   2              time_qua = 0;
+ 261   2              time_sec = time_sec + 1;
+ 262   2              // display time
+ 263   2              i = time_sec/10000 + '0';
+ 264   2              j = time_sec%10000;
+ 265   2              LcdDispChar (1, 10, i);
+ 266   2              i = j/1000 + '0';
+ 267   2              j = j%1000;
+ 268   2              LcdDispChar (1, 11, i);
+ 269   2              i = j/100 + '0';
+ 270   2              j = j%100;
+ 271   2              LcdDispChar (1, 12, i);
+ 272   2              i = j/10 + '0';
+ 273   2              j = j%10;
+ 274   2              LcdDispChar (1, 13, i);
+ 275   2              LcdDispChar (1, 14, j);
+ 276   2              // display us0
+ 277   2      //        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
+ 278   2              len = us0_meas[0]*2;    // time in us
+ 279   2              len = len/2;        // single trace
+ 280   2              len = len/1000;     // time in ms
+ 281   2              len = len * 340;    // length in mm
+ 282   2              i = len/10000 + '0';
+ 283   2              j = len%10000;
+ 284   2              LcdDispChar (0, 0, i);
+ 285   2              i = j/1000 + '0';
+ 286   2              j = j%1000;
+ 287   2              LcdDispChar (0, 1, i);
+ 288   2              i = j/100 + '0';
+ 289   2              j = j%100;
+ 290   2              LcdDispChar (0, 2, i);
+ 291   2              i = j/10 + '0';
+ 292   2              j = j%10;
+ 293   2              LcdDispChar (0, 3, i);
+ 294   2              LcdDispChar (0, 4, j);
+ 295   2              // display us1
+ 296   2      //        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
+ 297   2              len = us1_meas[0]*2;    // time in us
+ 298   2              len = len/2;        // single trace
+ 299   2              len = len/1000;     // time in ms
+ 300   2              len = len * 340;    // length in mm
+ 301   2              i = len/10000 + '0';
+ 302   2              j = len%10000;
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 19:21:13 PAGE 6   
 
- 303   2              i = j/1000 + '0';
- 304   2              j = j%1000;
- 305   2              LcdDispChar (1, 1, i);
- 306   2              i = j/100 + '0';
- 307   2              j = j%100;
- 308   2              LcdDispChar (1, 2, i);
- 309   2              i = j/10 + '0';
- 310   2              j = j%10;
- 311   2              LcdDispChar (1, 3, i);
- 312   2              LcdDispChar (1, 4, j);
- 313   2          }
- 314   1          fsm = FSM_TUS0;
- 315   1      }
- 316          
- 317          //---------------------------------------------------------------------------
- 318          // Display Error Message
- 319          //---------------------------------------------------------------------------
- 320          void fsm_erro_proc(void)
- 321          {
- 322   1          u8 i;
- 323   1          // 1. clear screen
- 324   1          for (i=0; i<16; i++)
- 325   1              LcdDispChar (0, i, ' ');
- 326   1          for (i=0; i<16; i++)
- 327   1              LcdDispChar (1, i, ' ');
- 328   1          // 2. display "FSM ERROR!"
- 329   1          LcdDispString (0, 0, "FSM ERROR!!!");
- 330   1          LcdDispChar (1, 0, 'f');
- 331   1          LcdDispChar (1, 1, 's');
- 332   1          LcdDispChar (1, 2, 'm');
- 333   1          LcdDispChar (1, 3, ':');
- 334   1          LcdDispChar (1, 4, ('0'+fsm/100));
- 335   1          LcdDispChar (1, 5, ('0'+(fsm%100)/10));
- 336   1          LcdDispChar (1, 6, ('0'+fsm%10));
- 337   1          LcdDispChar (1, 7, 'd');
- 338   1          // 3. stay here
- 339   1          fsm = fsm;
- 340   1      }
- 341          
+ 303   2              LcdDispChar (1, 0, i);
+ 304   2              i = j/1000 + '0';
+ 305   2              j = j%1000;
+ 306   2              LcdDispChar (1, 1, i);
+ 307   2              i = j/100 + '0';
+ 308   2              j = j%100;
+ 309   2              LcdDispChar (1, 2, i);
+ 310   2              i = j/10 + '0';
+ 311   2              j = j%10;
+ 312   2              LcdDispChar (1, 3, i);
+ 313   2              LcdDispChar (1, 4, j);
+ 314   2          }
+ 315   1          fsm = FSM_TUS0;
+ 316   1      }
+ 317          
+ 318          //---------------------------------------------------------------------------
+ 319          // Display Error Message
+ 320          //---------------------------------------------------------------------------
+ 321          void fsm_erro_proc(void)
+ 322          {
+ 323   1          u8 i;
+ 324   1          // 1. clear screen
+ 325   1          for (i=0; i<16; i++)
+ 326   1              LcdDispChar (0, i, ' ');
+ 327   1          for (i=0; i<16; i++)
+ 328   1              LcdDispChar (1, i, ' ');
+ 329   1          // 2. display "FSM ERROR!"
+ 330   1          LcdDispString (0, 0, "FSM ERROR!!!");
+ 331   1          LcdDispChar (1, 0, 'f');
+ 332   1          LcdDispChar (1, 1, 's');
+ 333   1          LcdDispChar (1, 2, 'm');
+ 334   1          LcdDispChar (1, 3, ':');
+ 335   1          LcdDispChar (1, 4, ('0'+fsm/100));
+ 336   1          LcdDispChar (1, 5, ('0'+(fsm%100)/10));
+ 337   1          LcdDispChar (1, 6, ('0'+fsm%10));
+ 338   1          LcdDispChar (1, 7, 'd');
+ 339   1          // 3. stay here
+ 340   1          fsm = fsm;
+ 341   1      }
+ 342          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1165    ----
+   CODE SIZE        =   1167    ----
    CONSTANT SIZE    =     13    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

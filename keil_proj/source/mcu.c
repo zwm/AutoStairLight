@@ -16,6 +16,15 @@ void mcu_init (void)
     //* T0x12, T1x12
     //************************************
     AUXR        = 0x00;
+
+#ifdef JOY_SYS_COMPAT
+    AUXR1       = 0x00;
+    AUXR2       = 0x00;
+    IAP_CONTR   = 0x00;
+    WKTCL       = 0xFF;
+    WKTCH       = 0xEF;
+#endif
+
     //************************************
     //* MCLKO_S1, MCLKO_S0, ADRJ, Tx_Rx, MCLKO_2
     //* CLK_S2, CLK_S1, CLK_S0

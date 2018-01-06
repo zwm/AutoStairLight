@@ -7,6 +7,7 @@
 #include "delay.h"
 #include "lcd1602.h"
 #include "proj_lib.h"
+#include "pin_conf.h"
 #include "interrupt_service.h"
 //******************************************************
 
@@ -16,6 +17,7 @@
 //#define SIMULATE_ONLY
 // Print debug info to LCD, it's better to keep it!
 #define PRINT_DEBUG
+#define JOY_SYS_COMPAT
 //---------------------------------------------------------------------------
 // EN_US0 : enable untrasonic 0
 // EN_US1 : enable untrasonic 1

@@ -3,12 +3,24 @@
 void main (void)
 {
     // init
-    DelayMs (100);
+    LCD_BKL = 0;
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    LCD_BKL = ~LCD_BKL;
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    LCD_BKL = ~LCD_BKL;
+
     sys_init ();
 #ifdef PRINT_DEBUG
     LcdDispChar (0, 10, 'i');
 #endif
-    
 
     // main
     while (1)

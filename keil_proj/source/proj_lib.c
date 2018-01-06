@@ -47,8 +47,8 @@ u8 inc_check (STRUCT_INT_CNT *p)
 void sys_init (void)
 {
     // device init
-    LcdInit ();
     mcu_init ();
+    LcdInit ();
     // parameter init
     st_x0.cnt = 0;
     st_x0.bak = 0;
@@ -250,6 +250,7 @@ void fsm_wait_proc(void)
             break;
         }
     }
+    LCD_BKL = ~LCD_BKL;
     // frash flag
     us0_frash = 0;
     us1_frash = 0;
