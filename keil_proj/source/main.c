@@ -3,6 +3,7 @@
 void main (void)
 {
     // init
+#ifdef JOY_SYS_COMPAT
     LCD_BKL = 0;
     DelayMs (200);
     DelayMs (200);
@@ -16,10 +17,12 @@ void main (void)
     DelayMs (200);
     DelayMs (200);
     LCD_BKL = ~LCD_BKL;
+#endif
+    DelayMs (200);
 
     sys_init ();
 #ifdef PRINT_DEBUG
-    LcdDispChar (0, 10, 'i');
+    LcdDispChar (10, 0, 'i');
 #endif
 
     // main

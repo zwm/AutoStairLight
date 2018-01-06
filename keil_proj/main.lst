@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   MAIN                                                              01/06/2018 19:21:12 PAGE 1   
+C51 COMPILER V9.52.0.0   MAIN                                                              01/06/2018 21:36:08 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MAIN
@@ -13,57 +13,60 @@ line level    source
    3          void main (void)
    4          {
    5   1          // init
-   6   1          LCD_BKL = 0;
-   7   1          DelayMs (200);
+   6   1      #ifdef JOY_SYS_COMPAT
+   7   1          LCD_BKL = 0;
    8   1          DelayMs (200);
    9   1          DelayMs (200);
   10   1          DelayMs (200);
   11   1          DelayMs (200);
-  12   1          LCD_BKL = ~LCD_BKL;
-  13   1          DelayMs (200);
+  12   1          DelayMs (200);
+  13   1          LCD_BKL = ~LCD_BKL;
   14   1          DelayMs (200);
   15   1          DelayMs (200);
   16   1          DelayMs (200);
   17   1          DelayMs (200);
-  18   1          LCD_BKL = ~LCD_BKL;
-  19   1      
-  20   1          sys_init ();
-  21   1      #ifdef PRINT_DEBUG
-  22   1          LcdDispChar (0, 10, 'i');
-  23   1      #endif
-  24   1      
-  25   1          // main
-  26   1          while (1)
-  27   1          {
-  28   2              switch (fsm)
-  29   2              {
-  30   3                  case FSM_TUS0:
-  31   3                      fsm_tus0_proc();
-  32   3                      break;
-  33   3                  case FSM_TUS1:
-  34   3                      fsm_tus1_proc();
+  18   1          DelayMs (200);
+  19   1          LCD_BKL = ~LCD_BKL;
+  20   1      #endif
+  21   1          DelayMs (200);
+  22   1      
+  23   1          sys_init ();
+  24   1      #ifdef PRINT_DEBUG
+  25   1          LcdDispChar (10, 0, 'i');
+  26   1      #endif
+  27   1      
+  28   1          // main
+  29   1          while (1)
+  30   1          {
+  31   2              switch (fsm)
+  32   2              {
+  33   3                  case FSM_TUS0:
+  34   3                      fsm_tus0_proc();
   35   3                      break;
-  36   3                  case FSM_WAIT:
-  37   3                      fsm_wait_proc();
+  36   3                  case FSM_TUS1:
+  37   3                      fsm_tus1_proc();
   38   3                      break;
-  39   3                  default:
-  40   3                      fsm_erro_proc();
+  39   3                  case FSM_WAIT:
+  40   3                      fsm_wait_proc();
   41   3                      break;
-  42   3              }
-  43   2          }
-  44   1      }
-  45          
+  42   3                  default:
+  43   3                      fsm_erro_proc();
+  44   3                      break;
+  45   3              }
+  46   2          }
+  47   1      }
+  48          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    100    ----
+   CODE SIZE        =    105    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
+C51 COMPILER V9.52.0.0   MAIN                                                              01/06/2018 21:36:08 PAGE 2   
+
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
-C51 COMPILER V9.52.0.0   MAIN                                                              01/06/2018 19:21:12 PAGE 2   
-
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
 

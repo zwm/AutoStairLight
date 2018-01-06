@@ -250,7 +250,9 @@ void fsm_wait_proc(void)
             break;
         }
     }
+#ifdef JOY_SYS_COMPAT
     LCD_BKL = ~LCD_BKL;
+#endif
     // frash flag
     us0_frash = 0;
     us1_frash = 0;
@@ -262,17 +264,17 @@ void fsm_wait_proc(void)
         // display time
         i = time_sec/10000 + '0';
         j = time_sec%10000;
-        LcdDispChar (1, 10, i);
+        LcdDispChar (10, 1, i);
         i = j/1000 + '0';
         j = j%1000;
-        LcdDispChar (1, 11, i);
+        LcdDispChar (11, 1, i);
         i = j/100 + '0';
         j = j%100;
-        LcdDispChar (1, 12, i);
+        LcdDispChar (12, 1, i);
         i = j/10 + '0';
         j = j%10;
-        LcdDispChar (1, 13, i);
-        LcdDispChar (1, 14, j);
+        LcdDispChar (13, 1, i);
+        LcdDispChar (14, 1, j);
         // display us0
 //        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
         len = us0_meas[0]*2;    // time in us
@@ -284,14 +286,14 @@ void fsm_wait_proc(void)
         LcdDispChar (0, 0, i);
         i = j/1000 + '0';
         j = j%1000;
-        LcdDispChar (0, 1, i);
+        LcdDispChar (1, 0, i);
         i = j/100 + '0';
         j = j%100;
-        LcdDispChar (0, 2, i);
+        LcdDispChar (2, 0, i);
         i = j/10 + '0';
         j = j%10;
-        LcdDispChar (0, 3, i);
-        LcdDispChar (0, 4, j);
+        LcdDispChar (3, 0, i);
+        LcdDispChar (4, 0, j);
         // display us1
 //        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
         len = us1_meas[0]*2;    // time in us
@@ -300,17 +302,17 @@ void fsm_wait_proc(void)
         len = len * 340;    // length in mm
         i = len/10000 + '0';
         j = len%10000;
-        LcdDispChar (1, 0, i);
+        LcdDispChar (0, 1, i);
         i = j/1000 + '0';
         j = j%1000;
         LcdDispChar (1, 1, i);
         i = j/100 + '0';
         j = j%100;
-        LcdDispChar (1, 2, i);
+        LcdDispChar (2, 1, i);
         i = j/10 + '0';
         j = j%10;
-        LcdDispChar (1, 3, i);
-        LcdDispChar (1, 4, j);
+        LcdDispChar (3, 1, i);
+        LcdDispChar (4, 1, j);
     }
     fsm = FSM_TUS0;
 }
@@ -321,21 +323,33 @@ void fsm_wait_proc(void)
 void fsm_erro_proc(void)
 {
     u8 i;
+    while (1)
+    {
+        i = inc_check (&st_t0);
+        time_ms = time_ms + i*10;
+        if (time_ms > 1000)
+        {
+            time_ms = 0;
+            mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
+            time_qua = 4;
+            break;
+        }
+    }
     // 1. clear screen
     for (i=0; i<16; i++)
-        LcdDispChar (0, i, ' ');
+        LcdDispChar (i, 0, ' ');
     for (i=0; i<16; i++)
-        LcdDispChar (1, i, ' ');
+        LcdDispChar (i, 1, ' ');
     // 2. display "FSM ERROR!"
     LcdDispString (0, 0, "FSM ERROR!!!");
-    LcdDispChar (1, 0, 'f');
+    LcdDispChar (0, 1, 'f');
     LcdDispChar (1, 1, 's');
-    LcdDispChar (1, 2, 'm');
-    LcdDispChar (1, 3, ':');
-    LcdDispChar (1, 4, ('0'+fsm/100));
-    LcdDispChar (1, 5, ('0'+(fsm%100)/10));
-    LcdDispChar (1, 6, ('0'+fsm%10));
-    LcdDispChar (1, 7, 'd');
+    LcdDispChar (2, 1, 'm');
+    LcdDispChar (3, 1, ':');
+    LcdDispChar (4, 1, ('0'+fsm/100));
+    LcdDispChar (5, 1, ('0'+(fsm%100)/10));
+    LcdDispChar (6, 1, ('0'+fsm%10));
+    LcdDispChar (7, 1, 'd');
     // 3. stay here
     fsm = fsm;
 }

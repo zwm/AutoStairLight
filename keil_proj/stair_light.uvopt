@@ -271,10 +271,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>7</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>17</TopLine>
-      <CurrentLine>35</CurrentLine>
+      <TopLine>179</TopLine>
+      <CurrentLine>186</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\source\lcd1602.c</PathWithFileName>
       <FilenameWithoutPath>lcd1602.c</FilenameWithoutPath>
@@ -285,7 +285,7 @@
       <GroupNumber>1</GroupNumber>
       <FileNumber>4</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
