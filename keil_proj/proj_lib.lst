@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 21:36:08 PAGE 1   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/07/2018 15:49:20 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE PROJ_LIB
@@ -13,19 +13,19 @@ line level    source
    3          //---------------------------------------------------------------------------
    4          // Global Variable Define
    5          //---------------------------------------------------------------------------
-   6          u16  time_ms;
-   7          u16  time_qua;
-   8          u16  time_sec;
-   9          u8   fsm;
-  10          u8   us0_frash;
-  11          u8   us1_frash;
-  12          u16  us0_meas[4];
-  13          u16  us1_meas[4];
-  14          STRUCT_INT_CNT data st_x0;
-  15          STRUCT_INT_CNT data st_x1;
-  16          STRUCT_INT_CNT data st_t0;
-  17          STRUCT_INT_CNT data st_t1;
-  18          STRUCT_INT_CNT data *st_p;
+   6          volatile u16  time_ms;
+   7          volatile u16  time_qua;
+   8          volatile u16  time_sec;
+   9          volatile u8   fsm;
+  10          volatile u8   us0_frash;
+  11          volatile u8   us1_frash;
+  12          volatile u16  us0_meas[4];
+  13          volatile u16  us1_meas[4];
+  14          volatile STRUCT_INT_CNT data st_x0;
+  15          volatile STRUCT_INT_CNT data st_x1;
+  16          volatile STRUCT_INT_CNT data st_t0;
+  17          volatile STRUCT_INT_CNT data st_t1;
+  18          volatile STRUCT_INT_CNT data *st_p;
   19          
   20          //---------------------------------------------------------------------------
   21          // Check struct increased by interrupt
@@ -62,7 +62,7 @@ line level    source
   52   1          // parameter init
   53   1          st_x0.cnt = 0;
   54   1          st_x0.bak = 0;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 21:36:08 PAGE 2   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/07/2018 15:49:20 PAGE 2   
 
   55   1          st_x1.cnt = 0;
   56   1          st_x1.bak = 0;
@@ -126,7 +126,7 @@ line level    source
                               }
                               us0_meas[0] = (TH0<<8) + TL0;
                               us0_frash = 1;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 21:36:08 PAGE 3   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/07/2018 15:49:20 PAGE 3   
 
                               // record time
                               time_ms = time_ms + (((TH1<<8) + TL1)*2)/1000;
@@ -172,218 +172,266 @@ line level    source
  158          #ifdef EN_US1
  159          void fsm_tus1_proc(void)
  160          {
- 161   1          u8 i, j;
+ 161   1          u8 i=0;
  162   1          // set 
- 163   1          mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
- 164   1          mcu_set_exint (INT_IDX_1, INT_MOD_START);
- 165   1          mcu_set_tmr   (TMR_IDX_0, TMR_MOD_50MS );
- 166   1          mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
- 167   1          // start us0
- 168   1          us1_trig = 1;
- 169   1          DelayUs(100);
- 170   1          us1_trig = 0;
- 171   1          // detect
- 172   1          while (1)
- 173   1          {
- 174   2              // check response
- 175   2              i = inc_check (&st_x1);
- 176   2              if (i>0)
- 177   2              {
- 178   3                  // stop
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 21:36:08 PAGE 4   
+ 163   1      //    mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
+ 164   1      //    mcu_set_exint (INT_IDX_1, INT_MOD_START);
+ 165   1      //    mcu_set_tmr   (TMR_IDX_0, TMR_MOD_50MS );
+ 166   1      //    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
+ 167   1          mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
+ 168   1          mcu_set_exint (INT_IDX_1, INT_MOD_STOP );
+ 169   1          mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
+ 170   1          TR1 = 1;
+ 171   1          // start us1
+ 172   1          us1_trig = 1;
+ 173   1          DelayUs(80);
+ 174   1          us1_trig = 0;
+ 175   1          //
+ 176   1      /*    while (1)
+ 177   1          {
+ 178   1      //        us1_echo = 1;
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/07/2018 15:49:20 PAGE 4   
 
- 179   3                  mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
- 180   3                  mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
- 181   3                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
- 182   3                  mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
- 183   3                  if (i==1)   // normal response
- 184   3                  {
- 185   4                      // backup response
- 186   4                      for(j=0; j<3; j++)
- 187   4                      {
- 188   5                          us1_meas[j+1] = us1_meas[j];
- 189   5                      }
- 190   4                      us1_meas[0] = (TH1<<8) + TL1;
- 191   4                      us1_frash = 1;
- 192   4                      // record time
- 193   4                      time_ms = time_ms + (((TH0<<8) + TL0)*2)/1000;
- 194   4                      // jump to next state
- 195   4                      fsm = FSM_WAIT;
- 196   4                      break;
- 197   4                  }
- 198   3                  else
- 199   3                  {
- 200   4                      // record time
- 201   4                      time_ms = time_ms + (((TH0<<8) + TL0)*2)/1000;
- 202   4                      // jump to error state
- 203   4                      fsm = FSM_ERR_US1_MULTI_RESP;
- 204   4                      break;
- 205   4                  }
- 206   3              }
- 207   2              // check timeout
- 208   2              i = inc_check (&st_t0);
- 209   2              if (i>0)
- 210   2              {
- 211   3                  // stop
- 212   3                  mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
- 213   3                  mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
- 214   3                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
- 215   3                  mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
- 216   3                  time_ms = time_ms + 50;
- 217   3                  fsm = FSM_ERR_US1_TIMEOUT;
- 218   3                  break;
- 219   3              }
- 220   2          }
- 221   1      }
- 222          #else
+ 179   1      //        i = i+1;
+ 180   1              if (us1_echo)
+ 181   1              {
+ 182   1                  TR1 = 1;
+ 183   1                  break;
+ 184   1              }
+ 185   1          }*/
+ 186   1          // 
+ 187   1          DelayMs(50);
+ 188   1          while (1)
+ 189   1          {
+ 190   2              if (~us1_echo)
+ 191   2              {
+ 192   3                  us1_meas[0] = ((TH1<<8) + TL1);
+ 193   3                  fsm = FSM_WAIT;
+ 194   3                  TR1 = 0;
+ 195   3                  break;
+ 196   3              }
+ 197   2              if (TF1)
+ 198   2              {
+ 199   3                  fsm = FSM_ERR_US1_TIMEOUT;
+ 200   3                  TR1 = 0;
+ 201   3                  break;
+ 202   3              }
+ 203   2          }
+ 204   1      
+ 205   1      /*
+ 206   1          // detect
+ 207   1          while (1)
+ 208   1          {
+ 209   1              // check response
+ 210   1              i = inc_check (&st_x1);
+ 211   1              if (i>0)
+ 212   1              {
+ 213   1                  // stop
+ 214   1                  if (i==1)   // normal response
+ 215   1                  {
+ 216   1                      // backup response
+ 217   1                      for(j=0; j<3; j++)
+ 218   1                      {
+ 219   1                          us1_meas[j+1] = us1_meas[j];
+ 220   1                      }
+ 221   1                      us1_meas[0] = (TH1<<8) + TL1;
+ 222   1                      us1_frash = 1;
+ 223   1                      // record time
+ 224   1                      time_ms = time_ms + (((TH0<<8) + TL0)*2)/1000;
+ 225   1                      // jump to next state
+ 226   1                      mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
+ 227   1                      mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
+ 228   1                      mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
+ 229   1                      mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
+ 230   1                      fsm = FSM_WAIT;
+ 231   1                      break;
+ 232   1                  }
+ 233   1                  else
+ 234   1                  {
+ 235   1                      // record time
+ 236   1                      time_ms = time_ms + (((TH0<<8) + TL0)*2)/1000;
+ 237   1                      // jump to error state
+ 238   1                      fsm = FSM_ERR_US1_MULTI_RESP;
+ 239   1                      break;
+ 240   1                  }
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/07/2018 15:49:20 PAGE 5   
+
+ 241   1              }
+ 242   1              // check timeout
+ 243   1              i = inc_check (&st_t0);
+ 244   1              if (i>0)
+ 245   1              {
+ 246   1                  // stop
+ 247   1                  mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
+ 248   1                  mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
+ 249   1                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
+ 250   1                  mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
+ 251   1                  time_ms = time_ms + 50;
+ 252   1                  fsm = FSM_ERR_US1_TIMEOUT;
+ 253   1                  break;
+ 254   1              }
+ 255   1          }
+ 256   1          */
+ 257   1      }
+ 258          #else
               void fsm_tus1_proc(void)
               {
                   time_ms = time_ms;
                   fsm = FSM_WAIT;
               }
               #endif
- 229          
- 230          //---------------------------------------------------------------------------
- 231          // Wait for 250ms, and process the result of measurement
- 232          //---------------------------------------------------------------------------
- 233          void fsm_wait_proc(void)
- 234          {
- 235   1          u8 i, j;
- 236   1          u16 len;
- 237   1          // 250ms timer
- 238   1          mcu_set_tmr   (TMR_IDX_0, TMR_MOD_10MS);
- 239   1          while (1)
- 240   1          {
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 21:36:08 PAGE 5   
+ 265          
+ 266          //---------------------------------------------------------------------------
+ 267          // Wait for 250ms, and process the result of measurement
+ 268          //---------------------------------------------------------------------------
+ 269          void fsm_wait_proc(void)
+ 270          {
+ 271   1          u8 i, j;
+ 272   1          u16 len;
+ 273   1          // 250ms timer
+ 274   1          mcu_set_tmr   (TMR_IDX_0, TMR_MOD_10MS);
+ 275   1          TR0 = 1;
+ 276   1          ET0 = 1;
+ 277   1          while (1)
+ 278   1          {
+ 279   2              i = inc_check (&st_t0);
+ 280   2              time_ms = time_ms + i*10;
+ 281   2      //        if (time_ms > 250)
+ 282   2              if (time_ms > 1000)
+ 283   2              {
+ 284   3                  time_ms = 0;
+ 285   3                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
+ 286   3      //            time_qua = time_qua + 1;
+ 287   3                  time_qua = 4;
+ 288   3                  break;
+ 289   3              }
+ 290   2          }
+ 291   1      #ifdef JOY_SYS_COMPAT
+ 292   1      //    LCD_BKL = ~LCD_BKL;
+ 293   1      #endif
+ 294   1          // frash flag
+ 295   1          us0_frash = 0;
+ 296   1          us1_frash = 0;
+ 297   1          // refrash display each second
+ 298   1          if (time_qua == 4)
+ 299   1          {
+ 300   2              time_qua = 0;
+ 301   2              time_sec = time_sec + 1;
+ 302   2              // display time
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/07/2018 15:49:20 PAGE 6   
 
- 241   2              i = inc_check (&st_t0);
- 242   2              time_ms = time_ms + i*10;
- 243   2      //        if (time_ms > 250)
- 244   2              if (time_ms > 1000)
- 245   2              {
- 246   3                  time_ms = 0;
- 247   3                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
- 248   3      //            time_qua = time_qua + 1;
- 249   3                  time_qua = 4;
- 250   3                  break;
- 251   3              }
- 252   2          }
- 253   1      #ifdef JOY_SYS_COMPAT
- 254   1          LCD_BKL = ~LCD_BKL;
- 255   1      #endif
- 256   1          // frash flag
- 257   1          us0_frash = 0;
- 258   1          us1_frash = 0;
- 259   1          // refrash display each second
- 260   1          if (time_qua == 4)
- 261   1          {
- 262   2              time_qua = 0;
- 263   2              time_sec = time_sec + 1;
- 264   2              // display time
- 265   2              i = time_sec/10000 + '0';
- 266   2              j = time_sec%10000;
- 267   2              LcdDispChar (10, 1, i);
- 268   2              i = j/1000 + '0';
- 269   2              j = j%1000;
- 270   2              LcdDispChar (11, 1, i);
- 271   2              i = j/100 + '0';
- 272   2              j = j%100;
- 273   2              LcdDispChar (12, 1, i);
- 274   2              i = j/10 + '0';
- 275   2              j = j%10;
- 276   2              LcdDispChar (13, 1, i);
- 277   2              LcdDispChar (14, 1, j);
- 278   2              // display us0
- 279   2      //        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
- 280   2              len = us0_meas[0]*2;    // time in us
- 281   2              len = len/2;        // single trace
- 282   2              len = len/1000;     // time in ms
- 283   2              len = len * 340;    // length in mm
- 284   2              i = len/10000 + '0';
- 285   2              j = len%10000;
- 286   2              LcdDispChar (0, 0, i);
- 287   2              i = j/1000 + '0';
- 288   2              j = j%1000;
- 289   2              LcdDispChar (1, 0, i);
- 290   2              i = j/100 + '0';
- 291   2              j = j%100;
- 292   2              LcdDispChar (2, 0, i);
- 293   2              i = j/10 + '0';
- 294   2              j = j%10;
- 295   2              LcdDispChar (3, 0, i);
- 296   2              LcdDispChar (4, 0, j);
- 297   2              // display us1
- 298   2      //        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
- 299   2              len = us1_meas[0]*2;    // time in us
- 300   2              len = len/2;        // single trace
- 301   2              len = len/1000;     // time in ms
- 302   2              len = len * 340;    // length in mm
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 21:36:08 PAGE 6   
+ 303   2              i = time_sec/10000 + '0';
+ 304   2              j = time_sec%10000;
+ 305   2              LcdDispChar (10, 1, 's');
+ 306   2              LcdDispChar (11, 1, 'e');
+ 307   2              LcdDispChar (12, 1, 'c');
+ 308   2              LcdDispChar (13, 1, ':');
+ 309   2              LcdDispChar (14, 1, i);
+ 310   2              i = j/1000 + '0';
+ 311   2              j = j%1000;
+ 312   2              LcdDispChar (15, 1, i);
+ 313   2              i = j/100 + '0';
+ 314   2              j = j%100;
+ 315   2              LcdDispChar (16, 1, i);
+ 316   2              i = j/10 + '0';
+ 317   2              j = j%10 + '0';
+ 318   2              LcdDispChar (17, 1, i);
+ 319   2              LcdDispChar (18, 1, j);
+ 320   2              // display us0
+ 321   2      //        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
+ 322   2              len = us0_meas[0]*2;    // time in us
+ 323   2              len = len/2;        // single trace
+ 324   2              len = len/1000;     // time in ms
+ 325   2              len = len * 340;    // length in mm
+ 326   2              i = len/10000 + '0';
+ 327   2              j = len%10000;
+ 328   2              LcdDispChar (0, 0, i);
+ 329   2              i = j/1000 + '0';
+ 330   2              j = j%1000;
+ 331   2              LcdDispChar (1, 0, i);
+ 332   2              i = j/100 + '0';
+ 333   2              j = j%100;
+ 334   2              LcdDispChar (2, 0, i);
+ 335   2              i = j/10 + '0';
+ 336   2              j = j%10 + '0';
+ 337   2              LcdDispChar (3, 0, i);
+ 338   2              LcdDispChar (4, 0, j);
+ 339   2              LcdDispChar (5, 0, 'm');
+ 340   2              LcdDispChar (6, 0, 'm');
+ 341   2              // display us1
+ 342   2      //        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
+ 343   2      
+ 344   2      //        len = us1_meas[0]*2;    // time in us
+ 345   2      //        len = len/2;        // single trace
+ 346   2      //        len = len/1000;     // time in ms
+ 347   2      //        len = len * 340;    // length in mm
+ 348   2              len = us1_meas[0];
+ 349   2              i = len/10000 + '0';
+ 350   2              j = len%10000;
+ 351   2              LcdDispChar (0, 1, i);
+ 352   2              i = j/1000 + '0';
+ 353   2              j = j%1000;
+ 354   2              LcdDispChar (1, 1, i);
+ 355   2              i = j/100 + '0';
+ 356   2              j = j%100;
+ 357   2              LcdDispChar (2, 1, i);
+ 358   2              i = j/10 + '0';
+ 359   2              j = j%10 + '0';
+ 360   2              LcdDispChar (3, 1, i);
+ 361   2              LcdDispChar (4, 1, j);
+ 362   2              LcdDispChar (5, 1, 'm');
+ 363   2              LcdDispChar (6, 1, 'm');
+ 364   2          }
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/07/2018 15:49:20 PAGE 7   
 
- 303   2              i = len/10000 + '0';
- 304   2              j = len%10000;
- 305   2              LcdDispChar (0, 1, i);
- 306   2              i = j/1000 + '0';
- 307   2              j = j%1000;
- 308   2              LcdDispChar (1, 1, i);
- 309   2              i = j/100 + '0';
- 310   2              j = j%100;
- 311   2              LcdDispChar (2, 1, i);
- 312   2              i = j/10 + '0';
- 313   2              j = j%10;
- 314   2              LcdDispChar (3, 1, i);
- 315   2              LcdDispChar (4, 1, j);
- 316   2          }
- 317   1          fsm = FSM_TUS0;
- 318   1      }
- 319          
- 320          //---------------------------------------------------------------------------
- 321          // Display Error Message
- 322          //---------------------------------------------------------------------------
- 323          void fsm_erro_proc(void)
- 324          {
- 325   1          u8 i;
- 326   1          while (1)
- 327   1          {
- 328   2              i = inc_check (&st_t0);
- 329   2              time_ms = time_ms + i*10;
- 330   2              if (time_ms > 1000)
- 331   2              {
- 332   3                  time_ms = 0;
- 333   3                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
- 334   3                  time_qua = 4;
- 335   3                  break;
- 336   3              }
- 337   2          }
- 338   1          // 1. clear screen
- 339   1          for (i=0; i<16; i++)
- 340   1              LcdDispChar (i, 0, ' ');
- 341   1          for (i=0; i<16; i++)
- 342   1              LcdDispChar (i, 1, ' ');
- 343   1          // 2. display "FSM ERROR!"
- 344   1          LcdDispString (0, 0, "FSM ERROR!!!");
- 345   1          LcdDispChar (0, 1, 'f');
- 346   1          LcdDispChar (1, 1, 's');
- 347   1          LcdDispChar (2, 1, 'm');
- 348   1          LcdDispChar (3, 1, ':');
- 349   1          LcdDispChar (4, 1, ('0'+fsm/100));
- 350   1          LcdDispChar (5, 1, ('0'+(fsm%100)/10));
- 351   1          LcdDispChar (6, 1, ('0'+fsm%10));
- 352   1          LcdDispChar (7, 1, 'd');
- 353   1          // 3. stay here
- 354   1          fsm = fsm;
- 355   1      }
- 356          
+ 365   1          fsm = FSM_TUS0;
+ 366   1      }
+ 367          
+ 368          //---------------------------------------------------------------------------
+ 369          // Display Error Message
+ 370          //---------------------------------------------------------------------------
+ 371          void fsm_erro_proc(void)
+ 372          {
+ 373   1          u8 i;
+ 374   1          while (1)
+ 375   1          {
+ 376   2              i = inc_check (&st_t0);
+ 377   2              time_ms = time_ms + i*10;
+ 378   2              if (time_ms > 1000)
+ 379   2              {
+ 380   3                  time_ms = 0;
+ 381   3                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
+ 382   3                  time_qua = 4;
+ 383   3                  break;
+ 384   3              }
+ 385   2          }
+ 386   1          // 1. clear screen
+ 387   1          for (i=0; i<16; i++)
+ 388   1              LcdDispChar (i, 0, ' ');
+ 389   1          for (i=0; i<16; i++)
+ 390   1              LcdDispChar (i, 1, ' ');
+ 391   1          // 2. display "FSM ERROR!"
+ 392   1          LcdDispString (0, 0, "FSM ERROR!!!");
+ 393   1          LcdDispChar (0, 1, 'f');
+ 394   1          LcdDispChar (1, 1, 's');
+ 395   1          LcdDispChar (2, 1, 'm');
+ 396   1          LcdDispChar (3, 1, ':');
+ 397   1          LcdDispChar (4, 1, ('0'+fsm/100));
+ 398   1          LcdDispChar (5, 1, ('0'+(fsm%100)/10));
+ 399   1          LcdDispChar (6, 1, ('0'+fsm%10));
+ 400   1          LcdDispChar (7, 1, 'd');
+ 401   1          // 3. stay here
+ 402   1          fsm = fsm;
+ 403   1      }
+ 404          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1216    ----
+   CODE SIZE        =   1083    ----
    CONSTANT SIZE    =     13    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =     34       4
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/06/2018 21:36:08 PAGE 7   
-
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

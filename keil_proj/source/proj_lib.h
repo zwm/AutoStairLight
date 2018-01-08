@@ -66,6 +66,7 @@ extern u8   us0_frash;
 extern u8   us1_frash;
 extern u16  us0_meas[4];
 extern u16  us1_meas[4];
+extern u16  tt;
 extern STRUCT_INT_CNT data st_x0;
 extern STRUCT_INT_CNT data st_x1;
 extern STRUCT_INT_CNT data st_t0;
