@@ -18,11 +18,12 @@ void mcu_init (void)
     AUXR        = 0x00;
 
 #ifdef JOY_SYS_COMPAT
+    /*
     AUXR1       = 0x00;
     AUXR2       = 0x00;
     IAP_CONTR   = 0x00;
     WKTCL       = 0xFF;
-    WKTCH       = 0xEF;
+    WKTCH       = 0xEF;*/
 #endif
 
     //************************************
@@ -54,7 +55,7 @@ void mcu_init (void)
     P1M0        = 0x00;
     P2M1        = 0x00;
     P2M0        = 0x00;
-    P3M1        = 0x04;
+    P3M1        = 0x00;
     P3M0        = 0x00;
     //************************************
     // interrupt

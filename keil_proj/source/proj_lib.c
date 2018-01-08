@@ -167,26 +167,69 @@ void fsm_tus1_proc(void)
 //    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
     mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
     mcu_set_exint (INT_IDX_1, INT_MOD_STOP );
-    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
+//    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
+
+    TMOD = 0x88;
+
+    TR0 = 0;
+    ET0 = 0;
+    TF0 = 0;
+    TH0 = 0;
+    TL0 = 0;
+    TR0 = 1;
+
+
+    TR1 = 0;
+    ET1 = 0;
+    TF1 = 0;
+//    TH1 = time_sec>>8;
+//    TL1 = time_sec;
+    TH1 = 0;
+    TL1 = 0;
     TR1 = 1;
     // start us1
-    us1_trig = 1;
-    DelayUs(80);
+//    us1_trig = 1;
+/*    DelayUs(80);
+    if (time_sec % 3 == 0)
+        us1_trig = ~us1_trig;
+        */
+    us0_trig = 0;
     us1_trig = 0;
+    DelayUs(20);
+    us0_trig = 1;
+    us1_trig = 1;
+    DelayUs(20);
+    us0_trig = 0;
+    us1_trig = 0;
+
+//    us1_trig = 0;
     //
 /*    while (1)
     {
-//        us1_echo = 1;
-//        i = i+1;
         if (us1_echo)
         {
-            TR1 = 1;
+            break;
+        }
+    }
+    while (1)
+    {
+        if (~us1_echo)
+        {
             break;
         }
     }*/
     // 
+
     DelayMs(50);
-    while (1)
+    TR0 = 0;
+    TR1 = 0;
+//    us1_meas[0] = ((TH0<<8) + TL0);
+//    us0_meas[0] = ((TH1<<8) + TL1);
+    us0_meas[0] = ((TH0<<8) + TL0);
+    us1_meas[0] = ((TH1<<8) + TL1);
+    fsm = FSM_WAIT;
+
+/*    while (1)
     {
         if (~us1_echo)
         {
@@ -201,7 +244,7 @@ void fsm_tus1_proc(void)
             TR1 = 0;
             break;
         }
-    }
+    }*/
 
 /*
     // detect
@@ -269,7 +312,7 @@ void fsm_tus1_proc(void)
 //---------------------------------------------------------------------------
 void fsm_wait_proc(void)
 {
-    u8 i, j;
+    u16 i, j;
     u16 len;
     // 250ms timer
     mcu_set_tmr   (TMR_IDX_0, TMR_MOD_10MS);
@@ -279,8 +322,7 @@ void fsm_wait_proc(void)
     {
         i = inc_check (&st_t0);
         time_ms = time_ms + i*10;
-//        if (time_ms > 250)
-        if (time_ms > 1000)
+        if (time_ms > 250)
         {
             time_ms = 0;
             mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
@@ -320,10 +362,12 @@ void fsm_wait_proc(void)
         LcdDispChar (18, 1, j);
         // display us0
 //        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
-        len = us0_meas[0]*2;    // time in us
-        len = len/2;        // single trace
-        len = len/1000;     // time in ms
-        len = len * 340;    // length in mm
+//        len = us0_meas[0]*2;    // time in us
+//        len = len/2;        // single trace
+//        len = len/1000;     // time in ms
+//        len = len * 340;    // length in mm
+        len = us0_meas[0];
+        len = len * 0.34;
         i = len/10000 + '0';
         j = len%10000;
         LcdDispChar (0, 0, i);
@@ -342,11 +386,12 @@ void fsm_wait_proc(void)
         // display us1
 //        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
 
-//        len = us1_meas[0]*2;    // time in us
-//        len = len/2;        // single trace
+        len = us1_meas[0]*2;    // time in us
+        len = len/2;        // single trace
 //        len = len/1000;     // time in ms
 //        len = len * 340;    // length in mm
-        len = us1_meas[0];
+        len = len * 0.34;    // length in mm
+//        len = us1_meas[0];
         i = len/10000 + '0';
         j = len%10000;
         LcdDispChar (0, 1, i);
