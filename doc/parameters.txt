@@ -48,3 +48,4 @@ P3.3        Pin_3       Echo
 2. echo port: change to mode 输入模式
 3. trig 单独设计函数，长度是大于10us，不能更长
 4. 检查连线
+5. 短接两个脚，测试程序下降沿触发功能！
