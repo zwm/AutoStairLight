@@ -3,12 +3,27 @@
 void main (void)
 {
     // init
-    DelayMs (100);
+#ifdef JOY_SYS_COMPAT
+    LCD_BKL = 0;
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    LCD_BKL = ~LCD_BKL;
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    DelayMs (200);
+    LCD_BKL = ~LCD_BKL;
+#endif
+    DelayMs (200);
+
     sys_init ();
 #ifdef PRINT_DEBUG
-    LcdDispChar (0, 10, 'i');
+    LcdDispChar (10, 0, 'i');
 #endif
-    
 
     // main
     while (1)

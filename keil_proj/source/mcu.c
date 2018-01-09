@@ -16,6 +16,16 @@ void mcu_init (void)
     //* T0x12, T1x12
     //************************************
     AUXR        = 0x00;
+
+#ifdef JOY_SYS_COMPAT
+    /*
+    AUXR1       = 0x00;
+    AUXR2       = 0x00;
+    IAP_CONTR   = 0x00;
+    WKTCL       = 0xFF;
+    WKTCH       = 0xEF;*/
+#endif
+
     //************************************
     //* MCLKO_S1, MCLKO_S0, ADRJ, Tx_Rx, MCLKO_2
     //* CLK_S2, CLK_S1, CLK_S0
@@ -70,7 +80,8 @@ void mcu_set_exint (unsigned char idx, unsigned char mode)
     {
         EX0 = 0;        // disable int0
         IE0 = 0;        // clear int0 flag
-        IT0 = 1;        // int0 falling edge trigger int
+//        IT0 = 1;        // int0 falling edge trigger int
+        IT0 = 0;        // int0 falling edge trigger int
         if (mode == INT_MOD_START)
         {
             EX0 = 1;        // enable int0
@@ -83,7 +94,8 @@ void mcu_set_exint (unsigned char idx, unsigned char mode)
     {
         EX1 = 0;        // disable int1
         IE1 = 0;        // clear int1 flag
-        IT1 = 1;        // int1 falling edge trigger int
+//        IT1 = 1;        // int1 falling edge trigger int
+        IT1 = 0;        // int1 falling edge trigger int
         if (mode == INT_MOD_START)
         {
             EX1 = 1;        // enable int1
@@ -136,9 +148,9 @@ void mcu_set_tmr (unsigned char idx, unsigned char mode)
         }
         // set reg
         TF0 = 0;        // clear T0 overflow interrupt flag
-        ET0 = 1;        // enable T0 overflow interrupt
+//        ET0 = 1;        // enable T0 overflow interrupt
         EA = ea_bak;    // enable all interrupt
-        TR0 = 1;        // start T0
+//        TR0 = 1;        // start T0
     }
     // T1
     else if (idx == TMR_IDX_1)
@@ -172,9 +184,9 @@ void mcu_set_tmr (unsigned char idx, unsigned char mode)
         }
         // set reg
         TF1 = 0;        // clear T1 overflow interrupt flag
-        ET1 = 1;        // enable T1 overflow interrupt
+//        ET1 = 1;        // enable T1 overflow interrupt
         EA = ea_bak;    // enable all interrupt
-        TR1 = 1;        // start T1
+//        TR1 = 1;        // start T1
     }
 }
 

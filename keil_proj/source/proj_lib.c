@@ -3,19 +3,20 @@
 //---------------------------------------------------------------------------
 // Global Variable Define
 //---------------------------------------------------------------------------
-u16  time_ms;
-u16  time_qua;
-u16  time_sec;
-u8   fsm;
-u8   us0_frash;
-u8   us1_frash;
-u16  us0_meas[4];
-u16  us1_meas[4];
-STRUCT_INT_CNT data st_x0;
-STRUCT_INT_CNT data st_x1;
-STRUCT_INT_CNT data st_t0;
-STRUCT_INT_CNT data st_t1;
-STRUCT_INT_CNT data *st_p;
+volatile u16  time_ms;
+volatile u16  time_qua;
+volatile u16  time_sec;
+volatile u8   fsm;
+volatile u8   us0_frash;
+volatile u8   us1_frash;
+volatile u16  us0_meas[4];
+volatile u16  us1_meas[4];
+volatile u16  tt;
+volatile STRUCT_INT_CNT data st_x0;
+volatile STRUCT_INT_CNT data st_x1;
+volatile STRUCT_INT_CNT data st_t0;
+volatile STRUCT_INT_CNT data st_t1;
+volatile STRUCT_INT_CNT data *st_p;
 
 //---------------------------------------------------------------------------
 // Check struct increased by interrupt
@@ -47,8 +48,8 @@ u8 inc_check (STRUCT_INT_CNT *p)
 void sys_init (void)
 {
     // device init
-    LcdInit ();
     mcu_init ();
+    LcdInit ();
     // parameter init
     st_x0.cnt = 0;
     st_x0.bak = 0;
@@ -158,16 +159,94 @@ void fsm_tus0_proc(void)
 #ifdef EN_US1
 void fsm_tus1_proc(void)
 {
-    u8 i, j;
+    u8 i=0;
     // set 
+//    mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
+//    mcu_set_exint (INT_IDX_1, INT_MOD_START);
+//    mcu_set_tmr   (TMR_IDX_0, TMR_MOD_50MS );
+//    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
     mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
-    mcu_set_exint (INT_IDX_1, INT_MOD_START);
-    mcu_set_tmr   (TMR_IDX_0, TMR_MOD_50MS );
-    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
-    // start us0
-    us1_trig = 1;
-    DelayUs(100);
+    mcu_set_exint (INT_IDX_1, INT_MOD_STOP );
+//    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
+
+    TMOD = 0x88;
+
+    TR0 = 0;
+    ET0 = 0;
+    TF0 = 0;
+    TH0 = 0;
+    TL0 = 0;
+    TR0 = 1;
+
+
+    TR1 = 0;
+    ET1 = 0;
+    TF1 = 0;
+//    TH1 = time_sec>>8;
+//    TL1 = time_sec;
+    TH1 = 0;
+    TL1 = 0;
+    TR1 = 1;
+    // start us1
+//    us1_trig = 1;
+/*    DelayUs(80);
+    if (time_sec % 3 == 0)
+        us1_trig = ~us1_trig;
+        */
+    us0_trig = 0;
     us1_trig = 0;
+    DelayUs(20);
+    us0_trig = 1;
+    us1_trig = 1;
+    DelayUs(20);
+    us0_trig = 0;
+    us1_trig = 0;
+
+//    us1_trig = 0;
+    //
+/*    while (1)
+    {
+        if (us1_echo)
+        {
+            break;
+        }
+    }
+    while (1)
+    {
+        if (~us1_echo)
+        {
+            break;
+        }
+    }*/
+    // 
+
+    DelayMs(50);
+    TR0 = 0;
+    TR1 = 0;
+//    us1_meas[0] = ((TH0<<8) + TL0);
+//    us0_meas[0] = ((TH1<<8) + TL1);
+    us0_meas[0] = ((TH0<<8) + TL0);
+    us1_meas[0] = ((TH1<<8) + TL1);
+    fsm = FSM_WAIT;
+
+/*    while (1)
+    {
+        if (~us1_echo)
+        {
+            us1_meas[0] = ((TH1<<8) + TL1);
+            fsm = FSM_WAIT;
+            TR1 = 0;
+            break;
+        }
+        if (TF1)
+        {
+            fsm = FSM_ERR_US1_TIMEOUT;
+            TR1 = 0;
+            break;
+        }
+    }*/
+
+/*
     // detect
     while (1)
     {
@@ -176,10 +255,6 @@ void fsm_tus1_proc(void)
         if (i>0)
         {
             // stop
-            mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
-            mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
-            mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-            mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
             if (i==1)   // normal response
             {
                 // backup response
@@ -192,6 +267,10 @@ void fsm_tus1_proc(void)
                 // record time
                 time_ms = time_ms + (((TH0<<8) + TL0)*2)/1000;
                 // jump to next state
+                mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
+                mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
+                mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
+                mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
                 fsm = FSM_WAIT;
                 break;
             }
@@ -218,6 +297,7 @@ void fsm_tus1_proc(void)
             break;
         }
     }
+    */
 }
 #else
 void fsm_tus1_proc(void)
@@ -232,21 +312,28 @@ void fsm_tus1_proc(void)
 //---------------------------------------------------------------------------
 void fsm_wait_proc(void)
 {
-    u8 i, j;
+    u16 i, j;
     u16 len;
     // 250ms timer
     mcu_set_tmr   (TMR_IDX_0, TMR_MOD_10MS);
+    TR0 = 1;
+    ET0 = 1;
     while (1)
     {
         i = inc_check (&st_t0);
         time_ms = time_ms + i*10;
         if (time_ms > 250)
         {
+            time_ms = 0;
             mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-            time_qua = time_qua + 1;
+//            time_qua = time_qua + 1;
+            time_qua = 4;
             break;
         }
     }
+#ifdef JOY_SYS_COMPAT
+//    LCD_BKL = ~LCD_BKL;
+#endif
     // frash flag
     us0_frash = 0;
     us1_frash = 0;
@@ -258,53 +345,68 @@ void fsm_wait_proc(void)
         // display time
         i = time_sec/10000 + '0';
         j = time_sec%10000;
-        LcdDispChar (1, 10, i);
+        LcdDispChar (10, 1, 's');
+        LcdDispChar (11, 1, 'e');
+        LcdDispChar (12, 1, 'c');
+        LcdDispChar (13, 1, ':');
+        LcdDispChar (14, 1, i);
         i = j/1000 + '0';
         j = j%1000;
-        LcdDispChar (1, 11, i);
+        LcdDispChar (15, 1, i);
         i = j/100 + '0';
         j = j%100;
-        LcdDispChar (1, 12, i);
+        LcdDispChar (16, 1, i);
         i = j/10 + '0';
-        j = j%10;
-        LcdDispChar (1, 13, i);
-        LcdDispChar (1, 14, j);
+        j = j%10 + '0';
+        LcdDispChar (17, 1, i);
+        LcdDispChar (18, 1, j);
         // display us0
-        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
-        len = len/2;        // single trace
-        len = len/1000;     // time in ms
-        len = len * 340;    // length in mm
+//        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
+//        len = us0_meas[0]*2;    // time in us
+//        len = len/2;        // single trace
+//        len = len/1000;     // time in ms
+//        len = len * 340;    // length in mm
+        len = us0_meas[0];
+        len = len * 0.34;
         i = len/10000 + '0';
         j = len%10000;
         LcdDispChar (0, 0, i);
         i = j/1000 + '0';
         j = j%1000;
-        LcdDispChar (0, 1, i);
+        LcdDispChar (1, 0, i);
         i = j/100 + '0';
         j = j%100;
-        LcdDispChar (0, 2, i);
+        LcdDispChar (2, 0, i);
         i = j/10 + '0';
-        j = j%10;
-        LcdDispChar (0, 3, i);
-        LcdDispChar (0, 4, j);
+        j = j%10 + '0';
+        LcdDispChar (3, 0, i);
+        LcdDispChar (4, 0, j);
+        LcdDispChar (5, 0, 'm');
+        LcdDispChar (6, 0, 'm');
         // display us1
-        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
+//        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
+
+        len = us1_meas[0]*2;    // time in us
         len = len/2;        // single trace
-        len = len/1000;     // time in ms
-        len = len * 340;    // length in mm
+//        len = len/1000;     // time in ms
+//        len = len * 340;    // length in mm
+        len = len * 0.34;    // length in mm
+//        len = us1_meas[0];
         i = len/10000 + '0';
         j = len%10000;
-        LcdDispChar (1, 0, i);
+        LcdDispChar (0, 1, i);
         i = j/1000 + '0';
         j = j%1000;
         LcdDispChar (1, 1, i);
         i = j/100 + '0';
         j = j%100;
-        LcdDispChar (1, 2, i);
+        LcdDispChar (2, 1, i);
         i = j/10 + '0';
-        j = j%10;
-        LcdDispChar (1, 3, i);
-        LcdDispChar (1, 4, j);
+        j = j%10 + '0';
+        LcdDispChar (3, 1, i);
+        LcdDispChar (4, 1, j);
+        LcdDispChar (5, 1, 'm');
+        LcdDispChar (6, 1, 'm');
     }
     fsm = FSM_TUS0;
 }
@@ -315,21 +417,33 @@ void fsm_wait_proc(void)
 void fsm_erro_proc(void)
 {
     u8 i;
+    while (1)
+    {
+        i = inc_check (&st_t0);
+        time_ms = time_ms + i*10;
+        if (time_ms > 1000)
+        {
+            time_ms = 0;
+            mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
+            time_qua = 4;
+            break;
+        }
+    }
     // 1. clear screen
     for (i=0; i<16; i++)
-        LcdDispChar (0, i, ' ');
+        LcdDispChar (i, 0, ' ');
     for (i=0; i<16; i++)
-        LcdDispChar (1, i, ' ');
+        LcdDispChar (i, 1, ' ');
     // 2. display "FSM ERROR!"
     LcdDispString (0, 0, "FSM ERROR!!!");
-    LcdDispChar (1, 0, 'f');
+    LcdDispChar (0, 1, 'f');
     LcdDispChar (1, 1, 's');
-    LcdDispChar (1, 2, 'm');
-    LcdDispChar (1, 3, ':');
-    LcdDispChar (1, 4, ('0'+fsm/100));
-    LcdDispChar (1, 5, ('0'+(fsm%100)/10));
-    LcdDispChar (1, 6, ('0'+fsm%10));
-    LcdDispChar (1, 7, 'd');
+    LcdDispChar (2, 1, 'm');
+    LcdDispChar (3, 1, ':');
+    LcdDispChar (4, 1, ('0'+fsm/100));
+    LcdDispChar (5, 1, ('0'+(fsm%100)/10));
+    LcdDispChar (6, 1, ('0'+fsm%10));
+    LcdDispChar (7, 1, 'd');
     // 3. stay here
     fsm = fsm;
 }
