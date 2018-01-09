@@ -80,7 +80,7 @@ void mcu_set_exint (unsigned char idx, unsigned char mode)
     {
         EX0 = 0;        // disable int0
         IE0 = 0;        // clear int0 flag
-//        IT0 = 1;        // int0 falling edge trigger int
+        IT0 = 1;        // int0 falling edge trigger int
         IT0 = 0;        // int0 falling edge trigger int
         if (mode == INT_MOD_START)
         {
@@ -94,7 +94,7 @@ void mcu_set_exint (unsigned char idx, unsigned char mode)
     {
         EX1 = 0;        // disable int1
         IE1 = 0;        // clear int1 flag
-//        IT1 = 1;        // int1 falling edge trigger int
+        IT1 = 1;        // int1 falling edge trigger int
         IT1 = 0;        // int1 falling edge trigger int
         if (mode == INT_MOD_START)
         {
@@ -128,29 +128,29 @@ void mcu_set_tmr (unsigned char idx, unsigned char mode)
             TMOD = (TMOD & 0xF0) + 0x08;    // GATE=1, C/T=0, M1=0, M0=0
             TL0 = 0;    // reset TL0
             TH0 = 0;    // reset TH0
+            TR0 = 1;    // start T0
         }
         else if (mode == TMR_MOD_50MS)
         {
             TMOD = (TMOD & 0xF0) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
             TL0 = TL_INIT_50MS;     // load TL0
             TH0 = TH_INIT_50MS;     // load TH0
+            ET0 = 1;                // enable T0 overflow interrupt
+            TR0 = 1;                // start T0
         }
         else if (mode == TMR_MOD_10MS)
         {
             TMOD = (TMOD & 0xF0) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
             TL0 = TL_INIT_10MS;     // load TL0
             TH0 = TH_INIT_10MS;     // load TH0
+            ET0 = 1;                // enable T0 overflow interrupt
+            TR0 = 1;                // start T0
         }
         else if (mode == TMR_MOD_STOP)
         {
-            EA = ea_bak;    // enable all interrupt
-            return;
         }
         // set reg
-        TF0 = 0;        // clear T0 overflow interrupt flag
-//        ET0 = 1;        // enable T0 overflow interrupt
         EA = ea_bak;    // enable all interrupt
-//        TR0 = 1;        // start T0
     }
     // T1
     else if (idx == TMR_IDX_1)
@@ -162,31 +162,31 @@ void mcu_set_tmr (unsigned char idx, unsigned char mode)
         if (mode == TMR_MOD_CAP)
         {
             TMOD = (TMOD & 0x0F) + 0x80;    // GATE=1, C/T=0, M1=0, M0=0
-            TL1 = 0;                // reset TL1
-            TH1 = 0;                // reset TH1
+            TL1 = 0;    // reset TL1
+            TH1 = 0;    // reset TH1
+            TR1 = 1;    // start T1
         }
         else if (mode == TMR_MOD_50MS)
         {
             TMOD = (TMOD & 0x0F) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
             TL1 = TL_INIT_50MS;     // load TL1
             TH1 = TH_INIT_50MS;     // load TH1
+            ET1 = 1;                // enable T1 overflow interrupt
+            TR1 = 1;                // start T1
         }
         else if (mode == TMR_MOD_10MS)
         {
-            TMOD = (TMOD & 0x0F) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
+            TMOD = (TMOD & 0xF0) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
             TL1 = TL_INIT_10MS;     // load TL1
             TH1 = TH_INIT_10MS;     // load TH1
+            ET1 = 1;                // enable T1 overflow interrupt
+            TR1 = 1;                // start T1
         }
         else if (mode == TMR_MOD_STOP)
         {
-            EA = ea_bak;    // enable all interrupt
-            return;
         }
         // set reg
-        TF1 = 0;        // clear T1 overflow interrupt flag
-//        ET1 = 1;        // enable T1 overflow interrupt
         EA = ea_bak;    // enable all interrupt
-//        TR1 = 1;        // start T1
     }
 }
 
