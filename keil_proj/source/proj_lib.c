@@ -80,260 +80,75 @@ void sys_init (void)
 //---------------------------------------------------------------------------
 // Trigger one measurement of untrasonic 0
 //---------------------------------------------------------------------------
-#ifdef EN_US0
-void fsm_tus0_proc(void)
+void trig_us0 (void)
 {
-    u8 i, j;
-    // set 
-    time_ms = 0;
-    mcu_set_exint (INT_IDX_0, INT_MOD_START);
-    mcu_set_exint (INT_IDX_1, INT_MOD_STOP );
-    mcu_set_tmr   (TMR_IDX_0, TMR_MOD_CAP  );
-    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_50MS );
-    // start us0
     us0_trig = 1;
-    DelayUs(100);
+    DelayUs(20);        // more than 10us
     us0_trig = 0;
-    // detect
-    while (1)
-    {
-        // check response
-        i = inc_check (&st_x0);
-        if (i>0)
-        {
-            // stop
-            mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
-            mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
-            mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-            mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
-            if (i==1)   // normal response
-            {
-                // backup response
-                for(j=0; j<3; j++)
-                {
-                    us0_meas[j+1] = us0_meas[j];
-                }
-                us0_meas[0] = (TH0<<8) + TL0;
-                us0_frash = 1;
-                // record time
-                time_ms = time_ms + (((TH1<<8) + TL1)*2)/1000;
-                // jump to next state
-                fsm = FSM_TUS1;
-                break;
-            }
-            else
-            {
-                // record time
-                time_ms = time_ms + (((TH1<<8) + TL0)*2)/1000;
-                // jump to error state
-                fsm = FSM_ERR_US0_MULTI_RESP;
-                break;
-            }
-        }
-        // check timeout
-        i = inc_check (&st_t1);
-        if (i>0)
-        {
-            // stop
-            mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
-            mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
-            mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-            mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
-            time_ms = time_ms + 50;
-            fsm = FSM_ERR_US0_TIMEOUT;
-            break;
-        }
-    }
 }
-#else
-void fsm_tus0_proc(void)
-{
-    time_ms = 0;
-    fsm = FSM_TUS1;
-}
-#endif
 
 //---------------------------------------------------------------------------
 // Trigger one measurement of untrasonic 1
 //---------------------------------------------------------------------------
-#ifdef EN_US1
-void fsm_tus1_proc(void)
+void trig_us1 (void)
 {
-    u8 i=0;
-    // set 
-//    mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
-//    mcu_set_exint (INT_IDX_1, INT_MOD_START);
-//    mcu_set_tmr   (TMR_IDX_0, TMR_MOD_50MS );
-//    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
-    mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
-    mcu_set_exint (INT_IDX_1, INT_MOD_STOP );
-//    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
-
-    TMOD = 0x88;
-
-    TR0 = 0;
-    ET0 = 0;
-    TF0 = 0;
-    TH0 = 0;
-    TL0 = 0;
-    TR0 = 1;
-
-
-    TR1 = 0;
-    ET1 = 0;
-    TF1 = 0;
-//    TH1 = time_sec>>8;
-//    TL1 = time_sec;
-    TH1 = 0;
-    TL1 = 0;
-    TR1 = 1;
-    // start us1
-//    us1_trig = 1;
-/*    DelayUs(80);
-    if (time_sec % 3 == 0)
-        us1_trig = ~us1_trig;
-        */
-    us0_trig = 0;
-    us1_trig = 0;
-    DelayUs(20);
-    us0_trig = 1;
     us1_trig = 1;
-    DelayUs(20);
-    us0_trig = 0;
+    DelayUs(20);        // more than 10us
     us1_trig = 0;
-
-//    us1_trig = 0;
-    //
-/*    while (1)
-    {
-        if (us1_echo)
-        {
-            break;
-        }
-    }
-    while (1)
-    {
-        if (~us1_echo)
-        {
-            break;
-        }
-    }*/
-    // 
-
-    DelayMs(50);
-    TR0 = 0;
-    TR1 = 0;
-//    us1_meas[0] = ((TH0<<8) + TL0);
-//    us0_meas[0] = ((TH1<<8) + TL1);
-    us0_meas[0] = ((TH0<<8) + TL0);
-    us1_meas[0] = ((TH1<<8) + TL1);
-    fsm = FSM_WAIT;
-
-/*    while (1)
-    {
-        if (~us1_echo)
-        {
-            us1_meas[0] = ((TH1<<8) + TL1);
-            fsm = FSM_WAIT;
-            TR1 = 0;
-            break;
-        }
-        if (TF1)
-        {
-            fsm = FSM_ERR_US1_TIMEOUT;
-            TR1 = 0;
-            break;
-        }
-    }*/
-
-/*
-    // detect
-    while (1)
-    {
-        // check response
-        i = inc_check (&st_x1);
-        if (i>0)
-        {
-            // stop
-            if (i==1)   // normal response
-            {
-                // backup response
-                for(j=0; j<3; j++)
-                {
-                    us1_meas[j+1] = us1_meas[j];
-                }
-                us1_meas[0] = (TH1<<8) + TL1;
-                us1_frash = 1;
-                // record time
-                time_ms = time_ms + (((TH0<<8) + TL0)*2)/1000;
-                // jump to next state
-                mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
-                mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
-                mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-                mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
-                fsm = FSM_WAIT;
-                break;
-            }
-            else
-            {
-                // record time
-                time_ms = time_ms + (((TH0<<8) + TL0)*2)/1000;
-                // jump to error state
-                fsm = FSM_ERR_US1_MULTI_RESP;
-                break;
-            }
-        }
-        // check timeout
-        i = inc_check (&st_t0);
-        if (i>0)
-        {
-            // stop
-            mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
-            mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
-            mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-            mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
-            time_ms = time_ms + 50;
-            fsm = FSM_ERR_US1_TIMEOUT;
-            break;
-        }
-    }
-    */
 }
-#else
-void fsm_tus1_proc(void)
+
+//---------------------------------------------------------------------------
+// FSM state: FSM_US01 handler
+//---------------------------------------------------------------------------
+void fsm_us01_proc(void)
 {
-    time_ms = time_ms;
-    fsm = FSM_WAIT;
+    // set tmr
+    mcu_set_tmr   (TMR_IDX_0, TMR_MOD_CAP  );
+    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
+    // trigger
+    trig_us0();
+    trig_us1();
+    // wait finish
+    DelayMs(50);
+    // stop tmr
+    mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP );
+    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP );
+    // store value
+    us0_meas[3] = us0_meas[2];
+    us0_meas[2] = us0_meas[1];
+    us0_meas[1] = us0_meas[0];
+    us0_meas[0] = ((TH0<<8) + TL0);
+    us0_frash   = 1;
+    us1_meas[3] = us1_meas[2];
+    us1_meas[2] = us1_meas[1];
+    us1_meas[1] = us1_meas[0];
+    us1_meas[0] = ((TH1<<8) + TL1);
+    us1_frash   = 1;
+    // jump to next state
+    fsm = FSM_TICK;
 }
-#endif
 
 //---------------------------------------------------------------------------
-// Wait for 250ms, and process the result of measurement
+// FSM: FSM_TICK state handler, process each 1/4 second
 //---------------------------------------------------------------------------
-void fsm_wait_proc(void)
+void fsm_tick_proc (void)
 {
     u16 i, j;
     u16 len;
+    time_ms = 0;
     // 250ms timer
-    mcu_set_tmr   (TMR_IDX_0, TMR_MOD_10MS);
-    TR0 = 1;
-    ET0 = 1;
+    mcu_set_tmr (TMR_IDX_0, TMR_MOD_10MS);
     while (1)
     {
         i = inc_check (&st_t0);
-        time_ms = time_ms + i*10;
-        if (time_ms > 250)
+        time_ms = time_ms + i;
+        if (time_ms > 19)       // each 250ms
         {
-            time_ms = 0;
-            mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-//            time_qua = time_qua + 1;
-            time_qua = 4;
+            mcu_set_tmr (TMR_IDX_0, TMR_MOD_STOP);
+            time_qua = time_qua + 1;
             break;
         }
     }
-#ifdef JOY_SYS_COMPAT
-//    LCD_BKL = ~LCD_BKL;
-#endif
     // frash flag
     us0_frash = 0;
     us1_frash = 0;

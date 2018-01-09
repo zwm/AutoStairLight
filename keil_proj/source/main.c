@@ -30,14 +30,11 @@ void main (void)
     {
         switch (fsm)
         {
-            case FSM_TUS0:
-                fsm_tus0_proc();
+            case FSM_US01:
+                fsm_us01_proc();
                 break;
-            case FSM_TUS1:
-                fsm_tus1_proc();
-                break;
-            case FSM_WAIT:
-                fsm_wait_proc();
+            case FSM_TICK:
+                fsm_tick_proc();
                 break;
             default:
                 fsm_erro_proc();

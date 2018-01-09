@@ -10,8 +10,8 @@
 // 0 : FSM_TUS0
 // 1 : FSM_TUS1
 // 2 : FSM_WAIT
-#define FSM_TUS0                0
-#define FSM_TUS1                1
+#define FSM_US                  0
+#define FSM_TICK                1
 #define FSM_WAIT                2
 #define FSM_ERR_US0_MULTI_RESP  3
 #define FSM_ERR_US1_MULTI_RESP  4
