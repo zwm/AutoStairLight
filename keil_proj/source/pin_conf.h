@@ -44,4 +44,11 @@ sbit us1_echo                       =   P3^3;
 
 sbit LCD_BKL    = P3^5;
 
+
+// for JOY_SYS
+// KEY3(P3.7)       US0_TX
+// SWITCH_GM(P3.2)  US0_RX
+// KEY2(P3.4)       US1_TX
+// KEY1(P3.3)       US1_RX
+
 #endif

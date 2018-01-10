@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/08/2018 23:06:18 PAGE 1   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/10/2018 18:01:32 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE LCD1602
@@ -62,7 +62,7 @@ line level    source
   52   1          ebk = EA;
   53   1          EA = 0;
   54   1      
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/08/2018 23:06:18 PAGE 2   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/10/2018 18:01:32 PAGE 2   
 
   55   1          // write cmd
   56   1          PIN_1602_RS     = 0;
@@ -126,7 +126,7 @@ line level    source
  114   1          PIN_1602_RS     = 0;
  115   1          PIN_1602_RW     = 1;
  116   1          PIN_1602_EN     = 1;
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/08/2018 23:06:18 PAGE 3   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/10/2018 18:01:32 PAGE 3   
 
  117   1          PIN_1602_DATA   = 0xFF;
  118   1          DelayUs (0);
@@ -190,7 +190,7 @@ line level    source
  176          {
  177   1          unsigned char i;
  178   1          LcdWriteCmd (0x40 + (addr << 3));
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/08/2018 23:06:18 PAGE 4   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/10/2018 18:01:32 PAGE 4   
 
  179   1          for (i = 0; i < 8; i++)
  180   1              LcdWriteData (pval[i]);
@@ -254,7 +254,7 @@ line level    source
  238   2              LcdWriteData (((bcd >> 4) & 0x0F) + '0');
  239   2          }
  240   1      
-C51 COMPILER V9.52.0.0   LCD1602                                                           01/08/2018 23:06:18 PAGE 5   
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/10/2018 18:01:32 PAGE 5   
 
  241   1          // lower byte
  242   1          LcdSetPos ((x + 1), y);
@@ -271,47 +271,70 @@ line level    source
  253   2          }
  254   1      }
  255          
- 256          //******************************************************
- 257          //* LCD Init
- 258          //******************************************************
- 259          void LcdInit (void)
+ 256          //**************************************************
+ 257          //* Func: display int
+ 258          //**************************************************
+ 259          void LcdDispInt (unsigned char x, unsigned char y, unsigned int dat)
  260          {
- 261   1          // 1. Bus Mode 38: 8b, 2 lines
- 262   1          DelayMs (50);
- 263   1          LcdWriteCmd (LCD1602_CMD_BM_38);        // 39us
- 264   1          DelayUs (100);
- 265   1      
- 266   1          // 5. Display Mode 0C: open screen, no cursor, no splash
- 267   1          LcdWriteCmd (LCD1602_CMD_DM_0C);
- 268   1          DelayUs (100);
- 269   1      
- 270   1          // 2. Display Mode 08: close screen
- 271   1          //LcdWriteCmd (LCD1602_CMD_DM_08);      // 39us
- 272   1          //DelayUs (100);
- 273   1      
- 274   1          // 3. Clear Screen 01
- 275   1          LcdWriteCmd (LCD1602_CMD_CLS);          // 1.53ms
- 276   1          DelayMs (10);
- 277   1      
- 278   1          // 4. Enter Mode 06: addr+1, no scroll
- 279   1          LcdWriteCmd (LCD1602_CMD_EM_06);        // 39us
- 280   1          DelayUs (100);
- 281   1      
- 282   1          // 5. Display Mode 0C: open screen, no cursor, no splash
- 283   1          //LcdWriteCmd (LCD1602_CMD_DM_0C);
- 284   1          //DelayUs (250);
- 285   1      }
- 286          
- 287          //**************************************************
- 288          
+ 261   1          unsigned int i, j;
+ 262   1          i = dat/10000 + '0';
+ 263   1          j = dat%10000;
+ 264   1          LcdDispChar (x+0, y, i);
+ 265   1          i = j/1000 + '0';
+ 266   1          j = j%1000;
+ 267   1          LcdDispChar (x+1, y, i);
+ 268   1          i = j/100 + '0';
+ 269   1          j = j%100;
+ 270   1          LcdDispChar (x+2, y, i);
+ 271   1          i = j/10 + '0';
+ 272   1          j = j%10 + '0';
+ 273   1          LcdDispChar (x+3, y, i);
+ 274   1          LcdDispChar (x+4, y, j);
+ 275   1      }
+ 276          
+ 277          //******************************************************
+ 278          //* LCD Init
+ 279          //******************************************************
+ 280          void LcdInit (void)
+ 281          {
+ 282   1          // 1. Bus Mode 38: 8b, 2 lines
+ 283   1          DelayMs (50);
+ 284   1          LcdWriteCmd (LCD1602_CMD_BM_38);        // 39us
+ 285   1          DelayUs (100);
+ 286   1      
+ 287   1          // 5. Display Mode 0C: open screen, no cursor, no splash
+ 288   1          LcdWriteCmd (LCD1602_CMD_DM_0C);
+ 289   1          DelayUs (100);
+ 290   1      
+ 291   1          // 2. Display Mode 08: close screen
+ 292   1          //LcdWriteCmd (LCD1602_CMD_DM_08);      // 39us
+ 293   1          //DelayUs (100);
+ 294   1      
+ 295   1          // 3. Clear Screen 01
+ 296   1          LcdWriteCmd (LCD1602_CMD_CLS);          // 1.53ms
+ 297   1          DelayMs (10);
+ 298   1      
+ 299   1          // 4. Enter Mode 06: addr+1, no scroll
+ 300   1          LcdWriteCmd (LCD1602_CMD_EM_06);        // 39us
+ 301   1          DelayUs (100);
+ 302   1      
+C51 COMPILER V9.52.0.0   LCD1602                                                           01/10/2018 18:01:32 PAGE 6   
+
+ 303   1          // 5. Display Mode 0C: open screen, no cursor, no splash
+ 304   1          //LcdWriteCmd (LCD1602_CMD_DM_0C);
+ 305   1          //DelayUs (250);
+ 306   1      }
+ 307          
+ 308          //**************************************************
+ 309          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    465    ----
+   CODE SIZE        =    661    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =   ----      14
+   DATA SIZE        =   ----      18
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----       5
 END OF MODULE INFORMATION.

@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/08/2018 23:06:18 PAGE 1   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/10/2018 18:01:32 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE PROJ_LIB
@@ -13,475 +13,273 @@ line level    source
    3          //---------------------------------------------------------------------------
    4          // Global Variable Define
    5          //---------------------------------------------------------------------------
-   6          volatile u16  time_ms;
-   7          volatile u16  time_qua;
-   8          volatile u16  time_sec;
-   9          volatile u8   fsm;
-  10          volatile u8   us0_frash;
-  11          volatile u8   us1_frash;
-  12          volatile u16  us0_meas[4];
-  13          volatile u16  us1_meas[4];
-  14          volatile u16  tt;
-  15          volatile STRUCT_INT_CNT data st_x0;
-  16          volatile STRUCT_INT_CNT data st_x1;
-  17          volatile STRUCT_INT_CNT data st_t0;
-  18          volatile STRUCT_INT_CNT data st_t1;
-  19          volatile STRUCT_INT_CNT data *st_p;
-  20          
-  21          //---------------------------------------------------------------------------
-  22          // Check struct increased by interrupt
-  23          //---------------------------------------------------------------------------
-  24          u8 inc_check (STRUCT_INT_CNT *p)
-  25          {
-  26   1          u8 cur;
-  27   1          cur = p->cnt;
-  28   1          if (cur > p->bak)       // normal increase
-  29   1          {
-  30   2              cur = cur - p->bak;
-  31   2              p->bak = p->cnt;
-  32   2          }
-  33   1          else if (cur < p->bak)  // overflow increase
-  34   1          {
-  35   2              cur = 256 - p->bak + cur;
-  36   2              p->bak = p->cnt;
-  37   2          }
-  38   1          else                    // no increase
-  39   1          {
-  40   2              cur = 0;
-  41   2          }
-  42   1          return cur;
-  43   1      }
-  44          
-  45          //---------------------------------------------------------------------------
-  46          // Initial System
-  47          //---------------------------------------------------------------------------
-  48          void sys_init (void)
-  49          {
-  50   1          // device init
-  51   1          mcu_init ();
-  52   1          LcdInit ();
-  53   1          // parameter init
-  54   1          st_x0.cnt = 0;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/08/2018 23:06:18 PAGE 2   
+   6          volatile u16  time_tick;
+   7          volatile u16  time_sec;
+   8          volatile u8   fsm;
+   9          volatile u8   us0_gap;
+  10          volatile u8   us1_gap;
+  11          volatile u16  us0_err;
+  12          volatile u16  us1_err;
+  13          volatile bit  stair_idle;
+  14          volatile bit  us0_frash;
+  15          volatile bit  us1_frash;
+  16          volatile u16  us0_meas[4];
+  17          volatile u16  us1_meas[4];
+  18          volatile STRUCT_INT_CNT data st_x0;
+  19          volatile STRUCT_INT_CNT data st_x1;
+  20          volatile STRUCT_INT_CNT data st_t0;
+  21          volatile STRUCT_INT_CNT data st_t1;
+  22          volatile STRUCT_INT_CNT data *st_p;
+  23          
+  24          //---------------------------------------------------------------------------
+  25          // Check struct increased by interrupt
+  26          //---------------------------------------------------------------------------
+  27          u8 inc_check (STRUCT_INT_CNT *p)
+  28          {
+  29   1          u8 cur;
+  30   1          cur = p->cnt;
+  31   1          if (cur > p->bak)       // normal increase
+  32   1          {
+  33   2              cur = cur - p->bak;
+  34   2              p->bak = p->cnt;
+  35   2          }
+  36   1          else if (cur < p->bak)  // overflow increase
+  37   1          {
+  38   2              cur = 256 - p->bak + cur;
+  39   2              p->bak = p->cnt;
+  40   2          }
+  41   1          else                    // no increase
+  42   1          {
+  43   2              cur = 0;
+  44   2          }
+  45   1          return cur;
+  46   1      }
+  47          
+  48          //---------------------------------------------------------------------------
+  49          // Initial System
+  50          //---------------------------------------------------------------------------
+  51          void sys_init (void)
+  52          {
+  53   1          // device init
+  54   1          mcu_init ();
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/10/2018 18:01:32 PAGE 2   
 
-  55   1          st_x0.bak = 0;
-  56   1          st_x1.cnt = 0;
-  57   1          st_x1.bak = 0;
-  58   1          st_t0.cnt = 0;
-  59   1          st_t0.bak = 0;
-  60   1          st_t1.cnt = 0;
-  61   1          st_t1.bak = 0;
-  62   1          us0_frash = 0;
-  63   1          us1_frash = 0;
-  64   1          us0_meas[0] = 0;
-  65   1          us0_meas[1] = 0;
-  66   1          us0_meas[2] = 0;
-  67   1          us0_meas[3] = 0;
-  68   1          us1_meas[0] = 0;
-  69   1          us1_meas[1] = 0;
-  70   1          us1_meas[2] = 0;
-  71   1          us1_meas[3] = 0;
-  72   1          time_ms = 0;
-  73   1          time_qua = 0;
-  74   1          time_sec = 0;
-  75   1          us0_trig = 0;
-  76   1          us1_trig = 0;
-  77   1          EA = 1;
-  78   1      }
-  79          
-  80          //---------------------------------------------------------------------------
-  81          // Trigger one measurement of untrasonic 0
-  82          //---------------------------------------------------------------------------
-  83          #ifdef EN_US0
-              void fsm_tus0_proc(void)
-              {
-                  u8 i, j;
-                  // set 
-                  time_ms = 0;
-                  mcu_set_exint (INT_IDX_0, INT_MOD_START);
-                  mcu_set_exint (INT_IDX_1, INT_MOD_STOP );
-                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_CAP  );
-                  mcu_set_tmr   (TMR_IDX_1, TMR_MOD_50MS );
-                  // start us0
-                  us0_trig = 1;
-                  DelayUs(100);
-                  us0_trig = 0;
-                  // detect
-                  while (1)
-                  {
-                      // check response
-                      i = inc_check (&st_x0);
-                      if (i>0)
-                      {
-                          // stop
-                          mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
-                          mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
-                          mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-                          mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
-                          if (i==1)   // normal response
-                          {
-                              // backup response
-                              for(j=0; j<3; j++)
-                              {
-                                  us0_meas[j+1] = us0_meas[j];
-                              }
-                              us0_meas[0] = (TH0<<8) + TL0;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/08/2018 23:06:18 PAGE 3   
+  55   1          LcdInit ();
+  56   1          // parameter init
+  57   1          st_x0.cnt = 0;
+  58   1          st_x0.bak = 0;
+  59   1          st_x1.cnt = 0;
+  60   1          st_x1.bak = 0;
+  61   1          st_t0.cnt = 0;
+  62   1          st_t0.bak = 0;
+  63   1          st_t1.cnt = 0;
+  64   1          st_t1.bak = 0;
+  65   1          us0_frash = 0;
+  66   1          us1_frash = 0;
+  67   1          us0_meas[0] = 0;
+  68   1          us0_meas[1] = 0;
+  69   1          us0_meas[2] = 0;
+  70   1          us0_meas[3] = 0;
+  71   1          us1_meas[0] = 0;
+  72   1          us1_meas[1] = 0;
+  73   1          us1_meas[2] = 0;
+  74   1          us1_meas[3] = 0;
+  75   1          time_tick = 0;
+  76   1          time_sec = 0;
+  77   1          fsm = FSM_US01;
+  78   1          us0_gap = 0;
+  79   1          us1_gap = 0;
+  80   1          us0_err = 0;
+  81   1          us1_err = 0;
+  82   1          stair_idle = 0;
+  83   1          us0_trig = 0;
+  84   1          us1_trig = 0;
+  85   1          EA = 1;
+  86   1      }
+  87          
+  88          //---------------------------------------------------------------------------
+  89          // Trigger one measurement of untrasonic 0
+  90          //---------------------------------------------------------------------------
+  91          void trig_us0 (void)
+  92          {
+  93   1          us0_trig = 1;
+  94   1          DelayUs(20);        // more than 10us
+  95   1          us0_trig = 0;
+  96   1      }
+  97          
+  98          //---------------------------------------------------------------------------
+  99          // Trigger one measurement of untrasonic 1
+ 100          //---------------------------------------------------------------------------
+ 101          void trig_us1 (void)
+ 102          {
+ 103   1          us1_trig = 1;
+ 104   1          DelayUs(20);        // more than 10us
+ 105   1          us1_trig = 0;
+ 106   1      }
+ 107          
+ 108          //---------------------------------------------------------------------------
+ 109          // FSM state: FSM_US01 handler
+ 110          //---------------------------------------------------------------------------
+ 111          void fsm_us01_proc(void)
+ 112          {
+ 113   1          // set tmr
+ 114   1          if (us0_gap != 0)
+ 115   1          {
+ 116   2              us0_gap = us0_gap - 1;
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/10/2018 18:01:32 PAGE 3   
 
-                              us0_frash = 1;
-                              // record time
-                              time_ms = time_ms + (((TH1<<8) + TL1)*2)/1000;
-                              // jump to next state
-                              fsm = FSM_TUS1;
-                              break;
-                          }
-                          else
-                          {
-                              // record time
-                              time_ms = time_ms + (((TH1<<8) + TL0)*2)/1000;
-                              // jump to error state
-                              fsm = FSM_ERR_US0_MULTI_RESP;
-                              break;
-                          }
-                      }
-                      // check timeout
-                      i = inc_check (&st_t1);
-                      if (i>0)
-                      {
-                          // stop
-                          mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
-                          mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
-                          mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
-                          mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
-                          time_ms = time_ms + 50;
-                          fsm = FSM_ERR_US0_TIMEOUT;
-                          break;
-                      }
-                  }
-              }
-              #else
- 149          void fsm_tus0_proc(void)
- 150          {
- 151   1          time_ms = 0;
- 152   1          fsm = FSM_TUS1;
- 153   1      }
- 154          #endif
- 155          
- 156          //---------------------------------------------------------------------------
- 157          // Trigger one measurement of untrasonic 1
- 158          //---------------------------------------------------------------------------
- 159          #ifdef EN_US1
- 160          void fsm_tus1_proc(void)
- 161          {
- 162   1          u8 i=0;
- 163   1          // set 
- 164   1      //    mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
- 165   1      //    mcu_set_exint (INT_IDX_1, INT_MOD_START);
- 166   1      //    mcu_set_tmr   (TMR_IDX_0, TMR_MOD_50MS );
- 167   1      //    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
- 168   1          mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
- 169   1          mcu_set_exint (INT_IDX_1, INT_MOD_STOP );
- 170   1      //    mcu_set_tmr   (TMR_IDX_1, TMR_MOD_CAP  );
- 171   1      
- 172   1          TMOD = 0x88;
- 173   1      
- 174   1          TR0 = 0;
- 175   1          ET0 = 0;
- 176   1          TF0 = 0;
- 177   1          TH0 = 0;
- 178   1          TL0 = 0;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/08/2018 23:06:18 PAGE 4   
+ 117   2          }
+ 118   1          if (us0_gap == 0)
+ 119   1          {
+ 120   2              mcu_set_exint (INT_IDX_0, INT_MOD_START);
+ 121   2              mcu_set_tmr (TMR_IDX_0, TMR_MOD_CAP  );
+ 122   2              trig_us0();
+ 123   2          }
+ 124   1          if (us1_gap != 0)
+ 125   1          {
+ 126   2              us1_gap = us1_gap - 1;
+ 127   2          }
+ 128   1          if (us1_gap == 0)
+ 129   1          {
+ 130   2              mcu_set_exint (INT_IDX_1, INT_MOD_START);
+ 131   2              mcu_set_tmr (TMR_IDX_1, TMR_MOD_CAP  );
+ 132   2              trig_us1();
+ 133   2          }
+ 134   1          // wait finish
+ 135   1          DelayMs(50);
+ 136   1          mcu_set_tmr (TMR_IDX_0, TMR_MOD_STOP );
+ 137   1          mcu_set_tmr (TMR_IDX_1, TMR_MOD_STOP );
+ 138   1          // store value
+ 139   1          if (us0_gap == 0)
+ 140   1          {
+ 141   2              if (IE0)
+ 142   2              {
+ 143   3                  IE0 = 0;
+ 144   3                  us0_meas[3] = us0_meas[2];
+ 145   3                  us0_meas[2] = us0_meas[1];
+ 146   3                  us0_meas[1] = us0_meas[0];
+ 147   3                  us0_meas[0] = ((TH0<<8) + TL0);
+ 148   3                  us0_frash   = 1;
+ 149   3              }
+ 150   2              else
+ 151   2              {
+ 152   3                  us0_gap = MEAS_ERR_GAP;
+ 153   3              }
+ 154   2          }
+ 155   1          if (us0_gap == 0)
+ 156   1          {
+ 157   2              if (IE1)
+ 158   2              {
+ 159   3                  IE1 = 0;
+ 160   3                  us1_meas[3] = us1_meas[2];
+ 161   3                  us1_meas[2] = us1_meas[1];
+ 162   3                  us1_meas[1] = us1_meas[0];
+ 163   3                  us1_meas[0] = ((TH1<<8) + TL1);
+ 164   3                  us1_frash   = 1;
+ 165   3              }
+ 166   2              else
+ 167   2              {
+ 168   3                  us1_gap = MEAS_ERR_GAP;
+ 169   3              }
+ 170   2          }
+ 171   1          // jump to next state
+ 172   1          fsm = FSM_TICK;
+ 173   1      }
+ 174          
+ 175          //---------------------------------------------------------------------------
+ 176          // FSM: FSM_TICK state handler, process each 1/4 second
+ 177          // JOY_SYS TEST DISPLAY:
+ 178          // char_index  |012345678901234567890123|
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/10/2018 18:01:32 PAGE 4   
 
- 179   1          TR0 = 1;
- 180   1      
- 181   1      
- 182   1          TR1 = 0;
- 183   1          ET1 = 0;
- 184   1          TF1 = 0;
- 185   1      //    TH1 = time_sec>>8;
- 186   1      //    TL1 = time_sec;
- 187   1          TH1 = 0;
- 188   1          TL1 = 0;
- 189   1          TR1 = 1;
- 190   1          // start us1
- 191   1      //    us1_trig = 1;
- 192   1      /*    DelayUs(80);
- 193   1          if (time_sec % 3 == 0)
- 194   1              us1_trig = ~us1_trig;
- 195   1              */
- 196   1          us0_trig = 0;
- 197   1          us1_trig = 0;
- 198   1          DelayUs(20);
- 199   1          us0_trig = 1;
- 200   1          us1_trig = 1;
- 201   1          DelayUs(20);
- 202   1          us0_trig = 0;
- 203   1          us1_trig = 0;
- 204   1      
- 205   1      //    us1_trig = 0;
- 206   1          //
- 207   1      /*    while (1)
- 208   1          {
- 209   1              if (us1_echo)
- 210   1              {
- 211   1                  break;
- 212   1              }
- 213   1          }
- 214   1          while (1)
- 215   1          {
- 216   1              if (~us1_echo)
- 217   1              {
- 218   1                  break;
- 219   1              }
- 220   1          }*/
- 221   1          // 
- 222   1      
- 223   1          DelayMs(50);
- 224   1          TR0 = 0;
- 225   1          TR1 = 0;
- 226   1      //    us1_meas[0] = ((TH0<<8) + TL0);
- 227   1      //    us0_meas[0] = ((TH1<<8) + TL1);
- 228   1          us0_meas[0] = ((TH0<<8) + TL0);
- 229   1          us1_meas[0] = ((TH1<<8) + TL1);
- 230   1          fsm = FSM_WAIT;
- 231   1      
- 232   1      /*    while (1)
- 233   1          {
- 234   1              if (~us1_echo)
- 235   1              {
- 236   1                  us1_meas[0] = ((TH1<<8) + TL1);
- 237   1                  fsm = FSM_WAIT;
- 238   1                  TR1 = 0;
- 239   1                  break;
- 240   1              }
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/08/2018 23:06:18 PAGE 5   
+ 179          // label       |len       err_num  time |
+ 180          // line0       |xxxxx     xxxxx         |
+ 181          // line1       |xxxxx     xxxxx    xxxxx|
+ 182          //---------------------------------------------------------------------------
+ 183          void fsm_tick_proc (void)
+ 184          {
+ 185   1          u16 i, j;
+ 186   1          i = 0;
+ 187   1          j = 0;
+ 188   1          // 250ms timer
+ 189   1          mcu_set_tmr (TMR_IDX_0, TMR_MOD_10MS);
+ 190   1          while (1)
+ 191   1          {
+ 192   2              i = inc_check (&st_t0);
+ 193   2              j = j + i;
+ 194   2              if (j >= (SYS_TICK_CYC/10))
+ 195   2              {
+ 196   3                  mcu_set_tmr (TMR_IDX_0, TMR_MOD_STOP);
+ 197   3                  break;
+ 198   3              }
+ 199   2          }
+ 200   1          time_tick = time_tick + 1;
+ 201   1          // display time of second
+ 202   1          if (time_tick%4 == 0)
+ 203   1          {
+ 204   2              time_sec = time_sec + 1;
+ 205   2              LcdDispInt  (19, 1, time_sec);
+ 206   2          }
+ 207   1          // display distance
+ 208   1          if (us0_frash == 1)
+ 209   1          {
+ 210   2              us0_frash = 0;
+ 211   2              i = us0_meas[0]*0.34;
+ 212   2              LcdDispInt  (0, 0, i);
+ 213   2              LcdDispChar (5, 0, 'm');
+ 214   2              LcdDispChar (6, 0, 'm');
+ 215   2          }
+ 216   1          if (us1_frash == 1)
+ 217   1          {
+ 218   2              us1_frash = 0;
+ 219   2              i = us1_meas[0]*0.34;
+ 220   2              LcdDispInt  (0, 1, i);
+ 221   2              LcdDispChar (5, 1, 'm');
+ 222   2              LcdDispChar (6, 1, 'm');
+ 223   2          }
+ 224   1          j = 0;
+ 225   1          if (us0_gap == 0 && us0_frash == 0)
+ 226   1          {
+ 227   2              us0_err = us0_err + 1;
+ 228   2              j = j + 1;
+ 229   2          }
+ 230   1          if (us1_gap == 0 && us1_frash == 0)
+ 231   1          {
+ 232   2              us1_err = us1_err + 1;
+ 233   2              j = j + 1;
+ 234   2          }
+ 235   1          if (j != 0)
+ 236   1          {
+ 237   2              fsm = FSM_ERRO;
+ 238   2          }
+ 239   1          else 
+ 240   1          {
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/10/2018 18:01:32 PAGE 5   
 
- 241   1              if (TF1)
- 242   1              {
- 243   1                  fsm = FSM_ERR_US1_TIMEOUT;
- 244   1                  TR1 = 0;
- 245   1                  break;
- 246   1              }
- 247   1          }*/
- 248   1      
- 249   1      /*
- 250   1          // detect
- 251   1          while (1)
- 252   1          {
- 253   1              // check response
- 254   1              i = inc_check (&st_x1);
- 255   1              if (i>0)
- 256   1              {
- 257   1                  // stop
- 258   1                  if (i==1)   // normal response
- 259   1                  {
- 260   1                      // backup response
- 261   1                      for(j=0; j<3; j++)
- 262   1                      {
- 263   1                          us1_meas[j+1] = us1_meas[j];
- 264   1                      }
- 265   1                      us1_meas[0] = (TH1<<8) + TL1;
- 266   1                      us1_frash = 1;
- 267   1                      // record time
- 268   1                      time_ms = time_ms + (((TH0<<8) + TL0)*2)/1000;
- 269   1                      // jump to next state
- 270   1                      mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
- 271   1                      mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
- 272   1                      mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
- 273   1                      mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
- 274   1                      fsm = FSM_WAIT;
- 275   1                      break;
- 276   1                  }
- 277   1                  else
- 278   1                  {
- 279   1                      // record time
- 280   1                      time_ms = time_ms + (((TH0<<8) + TL0)*2)/1000;
- 281   1                      // jump to error state
- 282   1                      fsm = FSM_ERR_US1_MULTI_RESP;
- 283   1                      break;
- 284   1                  }
- 285   1              }
- 286   1              // check timeout
- 287   1              i = inc_check (&st_t0);
- 288   1              if (i>0)
- 289   1              {
- 290   1                  // stop
- 291   1                  mcu_set_exint (INT_IDX_0, INT_MOD_STOP);
- 292   1                  mcu_set_exint (INT_IDX_1, INT_MOD_STOP);
- 293   1                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
- 294   1                  mcu_set_tmr   (TMR_IDX_1, TMR_MOD_STOP);
- 295   1                  time_ms = time_ms + 50;
- 296   1                  fsm = FSM_ERR_US1_TIMEOUT;
- 297   1                  break;
- 298   1              }
- 299   1          }
- 300   1          */
- 301   1      }
- 302          #else
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/08/2018 23:06:18 PAGE 6   
-
-              void fsm_tus1_proc(void)
-              {
-                  time_ms = time_ms;
-                  fsm = FSM_WAIT;
-              }
-              #endif
- 309          
- 310          //---------------------------------------------------------------------------
- 311          // Wait for 250ms, and process the result of measurement
- 312          //---------------------------------------------------------------------------
- 313          void fsm_wait_proc(void)
- 314          {
- 315   1          u16 i, j;
- 316   1          u16 len;
- 317   1          // 250ms timer
- 318   1          mcu_set_tmr   (TMR_IDX_0, TMR_MOD_10MS);
- 319   1          TR0 = 1;
- 320   1          ET0 = 1;
- 321   1          while (1)
- 322   1          {
- 323   2              i = inc_check (&st_t0);
- 324   2              time_ms = time_ms + i*10;
- 325   2              if (time_ms > 250)
- 326   2              {
- 327   3                  time_ms = 0;
- 328   3                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
- 329   3      //            time_qua = time_qua + 1;
- 330   3                  time_qua = 4;
- 331   3                  break;
- 332   3              }
- 333   2          }
- 334   1      #ifdef JOY_SYS_COMPAT
- 335   1      //    LCD_BKL = ~LCD_BKL;
- 336   1      #endif
- 337   1          // frash flag
- 338   1          us0_frash = 0;
- 339   1          us1_frash = 0;
- 340   1          // refrash display each second
- 341   1          if (time_qua == 4)
- 342   1          {
- 343   2              time_qua = 0;
- 344   2              time_sec = time_sec + 1;
- 345   2              // display time
- 346   2              i = time_sec/10000 + '0';
- 347   2              j = time_sec%10000;
- 348   2              LcdDispChar (10, 1, 's');
- 349   2              LcdDispChar (11, 1, 'e');
- 350   2              LcdDispChar (12, 1, 'c');
- 351   2              LcdDispChar (13, 1, ':');
- 352   2              LcdDispChar (14, 1, i);
- 353   2              i = j/1000 + '0';
- 354   2              j = j%1000;
- 355   2              LcdDispChar (15, 1, i);
- 356   2              i = j/100 + '0';
- 357   2              j = j%100;
- 358   2              LcdDispChar (16, 1, i);
- 359   2              i = j/10 + '0';
- 360   2              j = j%10 + '0';
- 361   2              LcdDispChar (17, 1, i);
- 362   2              LcdDispChar (18, 1, j);
- 363   2              // display us0
- 364   2      //        len = (us0_meas[0] + us0_meas[1] + us0_meas[2] + us0_meas[3])/2;    // time in us
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/08/2018 23:06:18 PAGE 7   
-
- 365   2      //        len = us0_meas[0]*2;    // time in us
- 366   2      //        len = len/2;        // single trace
- 367   2      //        len = len/1000;     // time in ms
- 368   2      //        len = len * 340;    // length in mm
- 369   2              len = us0_meas[0];
- 370   2              len = len * 0.34;
- 371   2              i = len/10000 + '0';
- 372   2              j = len%10000;
- 373   2              LcdDispChar (0, 0, i);
- 374   2              i = j/1000 + '0';
- 375   2              j = j%1000;
- 376   2              LcdDispChar (1, 0, i);
- 377   2              i = j/100 + '0';
- 378   2              j = j%100;
- 379   2              LcdDispChar (2, 0, i);
- 380   2              i = j/10 + '0';
- 381   2              j = j%10 + '0';
- 382   2              LcdDispChar (3, 0, i);
- 383   2              LcdDispChar (4, 0, j);
- 384   2              LcdDispChar (5, 0, 'm');
- 385   2              LcdDispChar (6, 0, 'm');
- 386   2              // display us1
- 387   2      //        len = (us1_meas[0] + us1_meas[1] + us1_meas[2] + us1_meas[3])/2;    // time in us
- 388   2      
- 389   2              len = us1_meas[0]*2;    // time in us
- 390   2              len = len/2;        // single trace
- 391   2      //        len = len/1000;     // time in ms
- 392   2      //        len = len * 340;    // length in mm
- 393   2              len = len * 0.34;    // length in mm
- 394   2      //        len = us1_meas[0];
- 395   2              i = len/10000 + '0';
- 396   2              j = len%10000;
- 397   2              LcdDispChar (0, 1, i);
- 398   2              i = j/1000 + '0';
- 399   2              j = j%1000;
- 400   2              LcdDispChar (1, 1, i);
- 401   2              i = j/100 + '0';
- 402   2              j = j%100;
- 403   2              LcdDispChar (2, 1, i);
- 404   2              i = j/10 + '0';
- 405   2              j = j%10 + '0';
- 406   2              LcdDispChar (3, 1, i);
- 407   2              LcdDispChar (4, 1, j);
- 408   2              LcdDispChar (5, 1, 'm');
- 409   2              LcdDispChar (6, 1, 'm');
- 410   2          }
- 411   1          fsm = FSM_TUS0;
- 412   1      }
- 413          
- 414          //---------------------------------------------------------------------------
- 415          // Display Error Message
- 416          //---------------------------------------------------------------------------
- 417          void fsm_erro_proc(void)
- 418          {
- 419   1          u8 i;
- 420   1          while (1)
- 421   1          {
- 422   2              i = inc_check (&st_t0);
- 423   2              time_ms = time_ms + i*10;
- 424   2              if (time_ms > 1000)
- 425   2              {
- 426   3                  time_ms = 0;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/08/2018 23:06:18 PAGE 8   
-
- 427   3                  mcu_set_tmr   (TMR_IDX_0, TMR_MOD_STOP);
- 428   3                  time_qua = 4;
- 429   3                  break;
- 430   3              }
- 431   2          }
- 432   1          // 1. clear screen
- 433   1          for (i=0; i<16; i++)
- 434   1              LcdDispChar (i, 0, ' ');
- 435   1          for (i=0; i<16; i++)
- 436   1              LcdDispChar (i, 1, ' ');
- 437   1          // 2. display "FSM ERROR!"
- 438   1          LcdDispString (0, 0, "FSM ERROR!!!");
- 439   1          LcdDispChar (0, 1, 'f');
- 440   1          LcdDispChar (1, 1, 's');
- 441   1          LcdDispChar (2, 1, 'm');
- 442   1          LcdDispChar (3, 1, ':');
- 443   1          LcdDispChar (4, 1, ('0'+fsm/100));
- 444   1          LcdDispChar (5, 1, ('0'+(fsm%100)/10));
- 445   1          LcdDispChar (6, 1, ('0'+fsm%10));
- 446   1          LcdDispChar (7, 1, 'd');
- 447   1          // 3. stay here
- 448   1          fsm = fsm;
- 449   1      }
- 450          
+ 241   2              fsm = FSM_US01;
+ 242   2          }
+ 243   1      }
+ 244          
+ 245          //---------------------------------------------------------------------------
+ 246          // FSM: FSM_ERRO handler
+ 247          //---------------------------------------------------------------------------
+ 248          void fsm_erro_proc(void)
+ 249          {
+ 250   1          LcdDispInt  (10, 0, us0_err);
+ 251   1          LcdDispInt  (10, 1, us1_err);
+ 252   1          fsm = FSM_US01;
+ 253   1      }
+ 254          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1274    ----
-   CONSTANT SIZE    =     13    ----
+   CODE SIZE        =    644    ----
+   CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     36       6
+   DATA SIZE        =     36       4
    IDATA SIZE       =   ----    ----
-   BIT SIZE         =   ----    ----
+   BIT SIZE         =      3    ----
 END OF MODULE INFORMATION.
 
 
