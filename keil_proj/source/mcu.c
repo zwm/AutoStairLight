@@ -69,6 +69,7 @@ void mcu_init (void)
 
 //---------------------------------------------------------------------------
 // SET Interrupt INT0 and INT1
+// Description: initial ext_int, set flag, disable interrupt enable
 //---------------------------------------------------------------------------
 void mcu_set_exint (unsigned char idx, unsigned char mode)
 {
@@ -80,28 +81,26 @@ void mcu_set_exint (unsigned char idx, unsigned char mode)
     {
         EX0 = 0;        // disable int0
         IE0 = 0;        // clear int0 flag
-        IT0 = 1;        // int0 falling edge trigger int
-        IT0 = 0;        // int0 falling edge trigger int
         if (mode == INT_MOD_START)
         {
-            EX0 = 1;        // enable int0
+            IT0 = 1;        // int0 falling edge trigger int
         }
         else if (mode == INT_MOD_STOP)
         {
+            IT0 = 0;
         }
     }
     else if (idx == INT_IDX_1)
     {
         EX1 = 0;        // disable int1
         IE1 = 0;        // clear int1 flag
-        IT1 = 1;        // int1 falling edge trigger int
-        IT1 = 0;        // int1 falling edge trigger int
         if (mode == INT_MOD_START)
         {
-            EX1 = 1;        // enable int1
+            IT1 = 1;        // int1 falling edge trigger int
         }
         else if (mode == INT_MOD_STOP)
         {
+            IT1 = 0;
         }
     }
     EA = ea_bak;
@@ -109,6 +108,7 @@ void mcu_set_exint (unsigned char idx, unsigned char mode)
 
 //---------------------------------------------------------------------------
 // SET T0 and T1
+// Description: inital timer, set config, start timer!
 //---------------------------------------------------------------------------
 void mcu_set_tmr (unsigned char idx, unsigned char mode)
 {

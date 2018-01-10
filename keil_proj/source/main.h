@@ -16,13 +16,17 @@
 // When download to hardware, must remove this definition! 201801051341
 //#define SIMULATE_ONLY
 // Print debug info to LCD, it's better to keep it!
-#define PRINT_DEBUG
+//#define PRINT_DEBUG
 #define JOY_SYS_COMPAT
+
+#define SYS_TICK_CYC        250         // unit ms
+#define MEAS_ERR_GAP          4         // When no echo of ultra-sonic detected, delay 'n' ticks to start the next measurement
+                                        // for test, we can set it '0' to enable measure 4 times each second!
 //---------------------------------------------------------------------------
 // EN_US0 : enable untrasonic 0
 // EN_US1 : enable untrasonic 1
 //---------------------------------------------------------------------------
 //#define EN_US0      1
-#define EN_US1      1
+//#define EN_US1      1
 
 #endif

@@ -19,11 +19,7 @@ void main (void)
     LCD_BKL = ~LCD_BKL;
 #endif
     DelayMs (200);
-
     sys_init ();
-#ifdef PRINT_DEBUG
-    LcdDispChar (10, 0, 'i');
-#endif
 
     // main
     while (1)

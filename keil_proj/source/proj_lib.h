@@ -7,16 +7,16 @@
 #include "main.h"
 
 // FSM
-// 0 : FSM_TUS0
-// 1 : FSM_TUS1
-// 2 : FSM_WAIT
-#define FSM_US                  0
+// 0 : FSM_US01    start measurement of two ultrasonic modules
+// 1 : FSM_TICK    process time tick of 1/4 second
+// 2 : FSM_ERRO    no echo received process
+#define FSM_US01                0
 #define FSM_TICK                1
-#define FSM_WAIT                2
-#define FSM_ERR_US0_MULTI_RESP  3
-#define FSM_ERR_US1_MULTI_RESP  4
-#define FSM_ERR_US0_TIMEOUT     5
-#define FSM_ERR_US1_TIMEOUT     6
+#define FSM_ERRO                2
+//#define FSM_ERR_US0_MULTI_RESP  3
+//#define FSM_ERR_US1_MULTI_RESP  4
+//#define FSM_ERR_US0_TIMEOUT     5
+//#define FSM_ERR_US1_TIMEOUT     6
 // Index of timer
 // 0: T0
 // 1: T0
@@ -54,30 +54,33 @@ typedef struct{
     u8 bak;
 } STRUCT_INT_CNT;
 
-
 //---------------------------------------------------------------------------
 // Global Variable Declearation
 //---------------------------------------------------------------------------
-extern u16  time_ms;
-extern u16  time_qua;
-extern u16  time_sec;
-extern u8   fsm;
-extern u8   us0_frash;
-extern u8   us1_frash;
-extern u16  us0_meas[4];
-extern u16  us1_meas[4];
-extern u16  tt;
-extern STRUCT_INT_CNT data st_x0;
-extern STRUCT_INT_CNT data st_x1;
-extern STRUCT_INT_CNT data st_t0;
-extern STRUCT_INT_CNT data st_t1;
-extern STRUCT_INT_CNT data *st_p;
+extern volatile u16  time_tick;
+extern volatile u16  time_sec;
+extern volatile u8   fsm;
+extern volatile u8   us0_gap;
+extern volatile u8   us1_gap;
+extern volatile u16  us0_err;
+extern volatile u16  us1_err;
+extern volatile bit  stair_idle;
+extern volatile bit  us0_frash;
+extern volatile bit  us1_frash;
+extern volatile u16  us0_meas[4];
+extern volatile u16  us1_meas[4];
+extern volatile STRUCT_INT_CNT data st_x0;
+extern volatile STRUCT_INT_CNT data st_x1;
+extern volatile STRUCT_INT_CNT data st_t0;
+extern volatile STRUCT_INT_CNT data st_t1;
+extern volatile STRUCT_INT_CNT data *st_p;
 
 u8 inc_check(STRUCT_INT_CNT *p);
 void sys_init (void);
-void fsm_tus0_proc(void);
-void fsm_tus1_proc(void);
-void fsm_wait_proc(void);
+void trig_us0 (void);
+void trig_us1 (void);
+void fsm_us01_proc(void);
+void fsm_tick_proc(void);
 void fsm_erro_proc(void);
 
 #endif

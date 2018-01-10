@@ -121,6 +121,7 @@ void LcdSetPos (unsigned char x, unsigned char y);
 void LcdDispChar (unsigned char x, unsigned char y, char c);
 void LcdDispString (unsigned char x, unsigned char y, char *ps);
 void LcdDispBCD (unsigned char x, unsigned char y, unsigned char bcd, unsigned char mode);
+void LcdDispInt (unsigned char x, unsigned char y, unsigned int dat);
 void LcdInit (void);
 //***************************************************************
 

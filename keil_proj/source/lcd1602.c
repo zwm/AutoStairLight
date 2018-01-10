@@ -253,6 +253,27 @@ void LcdDispBCD (unsigned char x, unsigned char y, unsigned char bcd, unsigned c
     }
 }
 
+//**************************************************
+//* Func: display int
+//**************************************************
+void LcdDispInt (unsigned char x, unsigned char y, unsigned int dat)
+{
+    unsigned int i, j;
+    i = dat/10000 + '0';
+    j = dat%10000;
+    LcdDispChar (x+0, y, i);
+    i = j/1000 + '0';
+    j = j%1000;
+    LcdDispChar (x+1, y, i);
+    i = j/100 + '0';
+    j = j%100;
+    LcdDispChar (x+2, y, i);
+    i = j/10 + '0';
+    j = j%10 + '0';
+    LcdDispChar (x+3, y, i);
+    LcdDispChar (x+4, y, j);
+}
+
 //******************************************************
 //* LCD Init
 //******************************************************
