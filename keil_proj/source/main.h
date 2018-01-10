@@ -20,7 +20,7 @@
 #define JOY_SYS_COMPAT
 
 #define SYS_TICK_CYC        250         // unit ms
-#define MEAS_ERR_GAP          4         // When no echo of ultra-sonic detected, delay 'n' ticks to start the next measurement
+#define MEAS_ERR_GAP          0         // When no echo of ultra-sonic detected, delay 'n' ticks to start the next measurement
                                         // for test, we can set it '0' to enable measure 4 times each second!
 //---------------------------------------------------------------------------
 // EN_US0 : enable untrasonic 0

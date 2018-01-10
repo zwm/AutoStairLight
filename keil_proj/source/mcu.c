@@ -176,7 +176,7 @@ void mcu_set_tmr (unsigned char idx, unsigned char mode)
         }
         else if (mode == TMR_MOD_10MS)
         {
-            TMOD = (TMOD & 0xF0) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
+            TMOD = (TMOD & 0x0F) + 0x00;    // GATE=0, C/T=0, M1=0, M0=0
             TL1 = TL_INIT_10MS;     // load TL1
             TH1 = TH_INIT_10MS;     // load TH1
             ET1 = 1;                // enable T1 overflow interrupt

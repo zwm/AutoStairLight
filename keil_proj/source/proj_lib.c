@@ -90,6 +90,7 @@ void sys_init (void)
 //---------------------------------------------------------------------------
 void trig_us0 (void)
 {
+    DelayUs(20);
     us0_trig = 1;
     DelayUs(20);        // more than 10us
     us0_trig = 0;
@@ -100,6 +101,7 @@ void trig_us0 (void)
 //---------------------------------------------------------------------------
 void trig_us1 (void)
 {
+    DelayUs(20);
     us1_trig = 1;
     DelayUs(20);        // more than 10us
     us1_trig = 0;
@@ -110,7 +112,6 @@ void trig_us1 (void)
 //---------------------------------------------------------------------------
 void fsm_us01_proc(void)
 {
-    // set tmr
     if (us0_gap != 0)
     {
         us0_gap = us0_gap - 1;
@@ -121,6 +122,26 @@ void fsm_us01_proc(void)
         mcu_set_tmr (TMR_IDX_0, TMR_MOD_CAP  );
         trig_us0();
     }
+/*        EX0 = 0;
+        IE0 = 0;
+        IT0 = 1;
+
+        TR0 = 0;    // stop T0
+        ET0 = 0;    // disable T0 overflow interrupt
+        TF0 = 0;    // clear T0 overflow interrupt flag
+        TMOD = 0x08;    // GATE=1, C/T=0, M1=0, M0=0
+        TL0 = 0;    // reset TL0
+        TH0 = 0;    // reset TH0
+        TR0 = 1;    // start T0
+
+        DelayUs(20);
+        us0_trig = 1;
+        DelayUs(20);
+        us0_trig = 0;
+        */
+
+
+
     if (us1_gap != 0)
     {
         us1_gap = us1_gap - 1;
@@ -133,7 +154,7 @@ void fsm_us01_proc(void)
     }
     // wait finish
     DelayMs(50);
-    mcu_set_tmr (TMR_IDX_0, TMR_MOD_STOP );
+//    mcu_set_tmr (TMR_IDX_0, TMR_MOD_STOP );
     mcu_set_tmr (TMR_IDX_1, TMR_MOD_STOP );
     // store value
     if (us0_gap == 0)
@@ -168,6 +189,10 @@ void fsm_us01_proc(void)
             us1_gap = MEAS_ERR_GAP;
         }
     }
+    us0_frash = 1;
+    us1_frash = 1;
+    us0_meas[0] = ((TH0<<8) + TL0);
+    us1_meas[0] = ((TH1<<8) + TL1);
     // jump to next state
     fsm = FSM_TICK;
 }
@@ -207,16 +232,16 @@ void fsm_tick_proc (void)
     // display distance
     if (us0_frash == 1)
     {
-        us0_frash = 0;
         i = us0_meas[0]*0.34;
+        i = us0_meas[0];
         LcdDispInt  (0, 0, i);
         LcdDispChar (5, 0, 'm');
         LcdDispChar (6, 0, 'm');
     }
     if (us1_frash == 1)
     {
-        us1_frash = 0;
         i = us1_meas[0]*0.34;
+        i = us1_meas[0];
         LcdDispInt  (0, 1, i);
         LcdDispChar (5, 1, 'm');
         LcdDispChar (6, 1, 'm');
@@ -224,11 +249,13 @@ void fsm_tick_proc (void)
     j = 0;
     if (us0_gap == 0 && us0_frash == 0)
     {
+        us0_frash = 0;
         us0_err = us0_err + 1;
         j = j + 1;
     }
     if (us1_gap == 0 && us1_frash == 0)
     {
+        us1_frash = 0;
         us1_err = us1_err + 1;
         j = j + 1;
     }
