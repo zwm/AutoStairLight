@@ -174,6 +174,11 @@ void fsm_us01_proc(void)
 
 //---------------------------------------------------------------------------
 // FSM: FSM_TICK state handler, process each 1/4 second
+// JOY_SYS TEST DISPLAY:
+// char_index  |012345678901234567890123|
+// label       |len       err_num  time |
+// line0       |xxxxx     xxxxx         |
+// line1       |xxxxx     xxxxx    xxxxx|
 //---------------------------------------------------------------------------
 void fsm_tick_proc (void)
 {
