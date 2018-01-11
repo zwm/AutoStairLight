@@ -116,6 +116,8 @@ void fsm_us01_proc(void)
     bit ea_bak;
     ea_bak = EA;
 #ifdef CHECK_MODE_INT
+    mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
+    mcu_set_exint (INT_IDX_1, INT_MOD_STOP );
     EA = 1;
 #else
     EA = 0;
@@ -253,7 +255,7 @@ void fsm_tick_proc (void)
         }
     }
     EA = ea_bak;
-    time_tick = time_tick + 1;
+    time_tick = time_tick + 2;
     // display time of second
     if (time_tick%4 == 0)
     {
@@ -263,16 +265,16 @@ void fsm_tick_proc (void)
     // display distance
     if (us0_frash == 1)
     {
+        us0_frash = 0;
         i = us0_meas[0]*0.34;
-        i = us0_meas[0];
         LcdDispInt  (0, 0, i);
         LcdDispChar (5, 0, 'm');
         LcdDispChar (6, 0, 'm');
     }
     if (us1_frash == 1)
     {
+        us1_frash = 0;
         i = us1_meas[0]*0.34;
-        i = us1_meas[0];
         LcdDispInt  (0, 1, i);
         LcdDispChar (5, 1, 'm');
         LcdDispChar (6, 1, 'm');
