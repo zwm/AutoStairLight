@@ -82,7 +82,7 @@ void sys_init (void)
     stair_idle = 0;
     us0_trig = 0;
     us1_trig = 0;
-    EA = 1;
+    EA = 0;
 }
 
 //---------------------------------------------------------------------------
@@ -112,6 +112,14 @@ void trig_us1 (void)
 //---------------------------------------------------------------------------
 void fsm_us01_proc(void)
 {
+    u8 i;
+    bit ea_bak;
+    ea_bak = EA;
+#ifdef CHECK_MODE_INT
+    EA = 1;
+#else
+    EA = 0;
+#endif
     if (us0_gap != 0)
     {
         us0_gap = us0_gap - 1;
@@ -122,26 +130,6 @@ void fsm_us01_proc(void)
         mcu_set_tmr (TMR_IDX_0, TMR_MOD_CAP  );
         trig_us0();
     }
-/*        EX0 = 0;
-        IE0 = 0;
-        IT0 = 1;
-
-        TR0 = 0;    // stop T0
-        ET0 = 0;    // disable T0 overflow interrupt
-        TF0 = 0;    // clear T0 overflow interrupt flag
-        TMOD = 0x08;    // GATE=1, C/T=0, M1=0, M0=0
-        TL0 = 0;    // reset TL0
-        TH0 = 0;    // reset TH0
-        TR0 = 1;    // start T0
-
-        DelayUs(20);
-        us0_trig = 1;
-        DelayUs(20);
-        us0_trig = 0;
-        */
-
-
-
     if (us1_gap != 0)
     {
         us1_gap = us1_gap - 1;
@@ -154,10 +142,47 @@ void fsm_us01_proc(void)
     }
     // wait finish
     DelayMs(50);
-//    mcu_set_tmr (TMR_IDX_0, TMR_MOD_STOP );
+    mcu_set_tmr (TMR_IDX_0, TMR_MOD_STOP );
     mcu_set_tmr (TMR_IDX_1, TMR_MOD_STOP );
+#ifdef CHECK_MODE_INT
     // store value
-    if (us0_gap == 0)
+    if (us0_gap == 0)   // ultra-sonic 0
+    {
+        i = inc_check (&st_x0);
+        if (i == 1)
+        {
+            us0_meas[3] = us0_meas[2];
+            us0_meas[2] = us0_meas[1];
+            us0_meas[1] = us0_meas[0];
+            us0_meas[0] = ((TH0<<8) + TL0);
+            us0_frash   = 1;
+        }
+        else
+        {
+            us0_err = us0_err + i + 10;
+            us0_gap = MEAS_ERR_GAP;
+        }
+    }
+    if (us1_gap == 0)   // ultra-sonic 1
+    {
+        i = inc_check (&st_x1);
+        if (i == 1)
+        {
+            us1_meas[3] = us1_meas[2];
+            us1_meas[2] = us1_meas[1];
+            us1_meas[1] = us1_meas[0];
+            us1_meas[0] = ((TH1<<8) + TL1);
+            us1_frash   = 1;
+        }
+        else
+        {
+            us1_err = us1_err + i + 10;
+            us1_gap = MEAS_ERR_GAP;
+        }
+    }
+#else       // POLL MODE
+    // store value
+    if (us0_gap == 0)   // ultra-sonic 0
     {
         if (IE0)
         {
@@ -170,10 +195,11 @@ void fsm_us01_proc(void)
         }
         else
         {
+            us0_err = us0_err + 1;
             us0_gap = MEAS_ERR_GAP;
         }
     }
-    if (us0_gap == 0)
+    if (us1_gap == 0)   // ultra-sonic 1
     {
         if (IE1)
         {
@@ -186,13 +212,14 @@ void fsm_us01_proc(void)
         }
         else
         {
+            us1_err = us1_err + 1;
             us1_gap = MEAS_ERR_GAP;
         }
     }
-    us0_frash = 1;
-    us1_frash = 1;
-    us0_meas[0] = ((TH0<<8) + TL0);
-    us1_meas[0] = ((TH1<<8) + TL1);
+#endif
+    mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
+    mcu_set_exint (INT_IDX_1, INT_MOD_STOP );
+    EA = ea_bak;
     // jump to next state
     fsm = FSM_TICK;
 }
@@ -249,14 +276,10 @@ void fsm_tick_proc (void)
     j = 0;
     if (us0_gap == 0 && us0_frash == 0)
     {
-        us0_frash = 0;
-        us0_err = us0_err + 1;
         j = j + 1;
     }
     if (us1_gap == 0 && us1_frash == 0)
     {
-        us1_frash = 0;
-        us1_err = us1_err + 1;
         j = j + 1;
     }
     if (j != 0)

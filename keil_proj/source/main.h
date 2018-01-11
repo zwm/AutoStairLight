@@ -19,6 +19,11 @@
 //#define PRINT_DEBUG
 #define JOY_SYS_COMPAT
 
+// check mode of ultra-sonic echo signal
+// only one should be defined! else INT mode will be choosen
+#define CHECK_MODE_INT
+//#define CHECK_MODE_POLL
+
 #define SYS_TICK_CYC        250         // unit ms
 #define MEAS_ERR_GAP          0         // When no echo of ultra-sonic detected, delay 'n' ticks to start the next measurement
                                         // for test, we can set it '0' to enable measure 4 times each second!

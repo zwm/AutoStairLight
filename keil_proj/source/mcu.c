@@ -84,6 +84,7 @@ void mcu_set_exint (unsigned char idx, unsigned char mode)
         if (mode == INT_MOD_START)
         {
             IT0 = 1;        // int0 falling edge trigger int
+            EX0 = 1;        // to get interrupt flag, must enable!!!
         }
         else if (mode == INT_MOD_STOP)
         {
@@ -97,6 +98,7 @@ void mcu_set_exint (unsigned char idx, unsigned char mode)
         if (mode == INT_MOD_START)
         {
             IT1 = 1;        // int1 falling edge trigger int
+            IE1 = 1;        // clear int1 flag
         }
         else if (mode == INT_MOD_STOP)
         {
