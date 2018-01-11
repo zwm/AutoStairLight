@@ -235,9 +235,12 @@ void fsm_us01_proc(void)
 void fsm_tick_proc (void)
 {
     u16 i, j;
+    bit ea_bak;
+    ea_bak = EA;
     i = 0;
     j = 0;
     // 250ms timer
+    EA = 1;
     mcu_set_tmr (TMR_IDX_0, TMR_MOD_10MS);
     while (1)
     {
@@ -249,6 +252,7 @@ void fsm_tick_proc (void)
             break;
         }
     }
+    EA = ea_bak;
     time_tick = time_tick + 1;
     // display time of second
     if (time_tick%4 == 0)

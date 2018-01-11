@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 11:57:07 PAGE 1   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 18:54:03 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE PROJ_LIB
@@ -62,7 +62,7 @@ line level    source
   52          {
   53   1          // device init
   54   1          mcu_init ();
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 11:57:07 PAGE 2   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 18:54:03 PAGE 2   
 
   55   1          LcdInit ();
   56   1          // parameter init
@@ -126,7 +126,7 @@ line level    source
  114          {
  115   1          u8 i;
  116   1          bit ea_bak;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 11:57:07 PAGE 3   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 18:54:03 PAGE 3   
 
  117   1          ea_bak = EA;
  118   1      #ifdef CHECK_MODE_INT
@@ -190,7 +190,7 @@ line level    source
                       }
                       else
                       {
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 11:57:07 PAGE 4   
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 18:54:03 PAGE 4   
 
                           us1_err = us1_err + i + 10;
                           us1_gap = MEAS_ERR_GAP;
@@ -252,87 +252,91 @@ line level    source
  235          void fsm_tick_proc (void)
  236          {
  237   1          u16 i, j;
- 238   1          i = 0;
- 239   1          j = 0;
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 11:57:07 PAGE 5   
+ 238   1          bit ea_bak;
+ 239   1          ea_bak = EA;
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 18:54:03 PAGE 5   
 
- 240   1          // 250ms timer
- 241   1          mcu_set_tmr (TMR_IDX_0, TMR_MOD_10MS);
- 242   1          while (1)
- 243   1          {
- 244   2              i = inc_check (&st_t0);
- 245   2              j = j + i;
- 246   2              if (j >= (SYS_TICK_CYC/10))
- 247   2              {
- 248   3                  mcu_set_tmr (TMR_IDX_0, TMR_MOD_STOP);
- 249   3                  break;
- 250   3              }
- 251   2          }
- 252   1          time_tick = time_tick + 1;
- 253   1          // display time of second
- 254   1          if (time_tick%4 == 0)
- 255   1          {
- 256   2              time_sec = time_sec + 1;
- 257   2              LcdDispInt  (19, 1, time_sec);
- 258   2          }
- 259   1          // display distance
- 260   1          if (us0_frash == 1)
- 261   1          {
- 262   2              i = us0_meas[0]*0.34;
- 263   2              i = us0_meas[0];
- 264   2              LcdDispInt  (0, 0, i);
- 265   2              LcdDispChar (5, 0, 'm');
- 266   2              LcdDispChar (6, 0, 'm');
- 267   2          }
- 268   1          if (us1_frash == 1)
- 269   1          {
- 270   2              i = us1_meas[0]*0.34;
- 271   2              i = us1_meas[0];
- 272   2              LcdDispInt  (0, 1, i);
- 273   2              LcdDispChar (5, 1, 'm');
- 274   2              LcdDispChar (6, 1, 'm');
- 275   2          }
- 276   1          j = 0;
- 277   1          if (us0_gap == 0 && us0_frash == 0)
- 278   1          {
- 279   2              j = j + 1;
- 280   2          }
- 281   1          if (us1_gap == 0 && us1_frash == 0)
+ 240   1          i = 0;
+ 241   1          j = 0;
+ 242   1          // 250ms timer
+ 243   1          EA = 1;
+ 244   1          mcu_set_tmr (TMR_IDX_0, TMR_MOD_10MS);
+ 245   1          while (1)
+ 246   1          {
+ 247   2              i = inc_check (&st_t0);
+ 248   2              j = j + i;
+ 249   2              if (j >= (SYS_TICK_CYC/10))
+ 250   2              {
+ 251   3                  mcu_set_tmr (TMR_IDX_0, TMR_MOD_STOP);
+ 252   3                  break;
+ 253   3              }
+ 254   2          }
+ 255   1          EA = ea_bak;
+ 256   1          time_tick = time_tick + 1;
+ 257   1          // display time of second
+ 258   1          if (time_tick%4 == 0)
+ 259   1          {
+ 260   2              time_sec = time_sec + 1;
+ 261   2              LcdDispInt  (19, 1, time_sec);
+ 262   2          }
+ 263   1          // display distance
+ 264   1          if (us0_frash == 1)
+ 265   1          {
+ 266   2              i = us0_meas[0]*0.34;
+ 267   2              i = us0_meas[0];
+ 268   2              LcdDispInt  (0, 0, i);
+ 269   2              LcdDispChar (5, 0, 'm');
+ 270   2              LcdDispChar (6, 0, 'm');
+ 271   2          }
+ 272   1          if (us1_frash == 1)
+ 273   1          {
+ 274   2              i = us1_meas[0]*0.34;
+ 275   2              i = us1_meas[0];
+ 276   2              LcdDispInt  (0, 1, i);
+ 277   2              LcdDispChar (5, 1, 'm');
+ 278   2              LcdDispChar (6, 1, 'm');
+ 279   2          }
+ 280   1          j = 0;
+ 281   1          if (us0_gap == 0 && us0_frash == 0)
  282   1          {
  283   2              j = j + 1;
  284   2          }
- 285   1          if (j != 0)
+ 285   1          if (us1_gap == 0 && us1_frash == 0)
  286   1          {
- 287   2              fsm = FSM_ERRO;
+ 287   2              j = j + 1;
  288   2          }
- 289   1          else 
+ 289   1          if (j != 0)
  290   1          {
- 291   2              fsm = FSM_US01;
+ 291   2              fsm = FSM_ERRO;
  292   2          }
- 293   1      }
- 294          
- 295          //---------------------------------------------------------------------------
- 296          // FSM: FSM_ERRO handler
- 297          //---------------------------------------------------------------------------
- 298          void fsm_erro_proc(void)
- 299          {
- 300   1          LcdDispInt  (10, 0, us0_err);
- 301   1          LcdDispInt  (10, 1, us1_err);
-C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 11:57:07 PAGE 6   
+ 293   1          else 
+ 294   1          {
+ 295   2              fsm = FSM_US01;
+ 296   2          }
+ 297   1      }
+ 298          
+ 299          //---------------------------------------------------------------------------
+ 300          // FSM: FSM_ERRO handler
+ 301          //---------------------------------------------------------------------------
+C51 COMPILER V9.52.0.0   PROJ_LIB                                                          01/11/2018 18:54:03 PAGE 6   
 
- 302   1          fsm = FSM_US01;
- 303   1      }
- 304          
+ 302          void fsm_erro_proc(void)
+ 303          {
+ 304   1          LcdDispInt  (10, 0, us0_err);
+ 305   1          LcdDispInt  (10, 1, us1_err);
+ 306   1          fsm = FSM_US01;
+ 307   1      }
+ 308          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    686    ----
+   CODE SIZE        =    696    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =     36       5
    IDATA SIZE       =   ----    ----
-   BIT SIZE         =      3       1
+   BIT SIZE         =      3       2
 END OF MODULE INFORMATION.
 
 
