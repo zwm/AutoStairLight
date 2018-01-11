@@ -114,6 +114,8 @@ void fsm_us01_proc(void)
 {
     u8 i;
     bit ea_bak;
+    // debug
+    LcdDispChar (19, 0, fsm+'0');
     ea_bak = EA;
 #ifdef CHECK_MODE_INT
     mcu_set_exint (INT_IDX_0, INT_MOD_STOP );
@@ -237,16 +239,62 @@ void fsm_us01_proc(void)
 void fsm_tick_proc (void)
 {
     u16 i, j;
+    u8  k;
     bit ea_bak;
     ea_bak = EA;
     i = 0;
     j = 0;
+    k = 0;
+    LcdDispChar (19, 0, fsm+'0');
     // 250ms timer
     EA = 1;
     mcu_set_tmr (TMR_IDX_0, TMR_MOD_10MS);
     while (1)
     {
+        k = k+1;
+        LcdDispChar (22, 0, (k%100)/10+'0');
+        LcdDispChar (23, 0, (k%100)%10+'0');
+
+//        LcdDispChar (16, 0, (j%100)/10+'0');
+//        LcdDispChar (17, 0, (j%100)%10+'0');
+
+        LcdDispChar (16, 0, (st_t0.cnt%100)/10+'0');
+        LcdDispChar (17, 0, (st_t0.cnt%100)%10+'0');
+
+        LcdDispChar (16, 1, (st_t0.bak%100)/10+'0');
+        LcdDispChar (17, 1, (st_t0.bak%100)%10+'0');
+
+        if (ET0)
+            LcdDispChar (20, 0, '1');
+        else
+            LcdDispChar (20, 0, '0');
+        if (TF0)
+            LcdDispChar (21, 0, '1');
+        else
+            LcdDispChar (21, 0, '0');
+
+/*        if (EA)
+            LcdDispChar (7, 0, '1');
+        else
+            LcdDispChar (7, 0, '0');
+        if (TR0)
+            LcdDispChar (8, 0, '1');
+        else
+            LcdDispChar (8, 0, '0');*/
+
+        LcdDispChar (7, 0, (TH0%100)+'0');
+        LcdDispChar (8, 0, (TH0%100)/10+'0');
+        LcdDispChar (9, 0, (TH0%100)%10+'0');
+
+        LcdDispChar (7, 1, (TL0%100)+'0');
+        LcdDispChar (8, 1, (TL0%100)/10+'0');
+        LcdDispChar (9, 1, (TL0%100)%10+'0');
+
+
+
+        EA = 0;
         i = inc_check (&st_t0);
+        EA = 1;
         j = j + i;
         if (j >= (SYS_TICK_CYC/10))
         {
@@ -303,6 +351,9 @@ void fsm_tick_proc (void)
 //---------------------------------------------------------------------------
 void fsm_erro_proc(void)
 {
+    // debug
+    LcdDispChar (19, 0, fsm+'0');
+
     LcdDispInt  (10, 0, us0_err);
     LcdDispInt  (10, 1, us1_err);
     fsm = FSM_US01;

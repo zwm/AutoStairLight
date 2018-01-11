@@ -7,29 +7,30 @@
 #include	"interrupt_service.h"
 
 // INT0
-void ext_int0_servece (void) interrupt 0 using 1
+void ext_int0_servece (void) interrupt 0 using 0
 {
     // HW auto clear interrupt flag
     st_x0.cnt++;
 }
 
 // INT1
-void ext_int1_servece (void) interrupt 2 using 1
+void ext_int1_servece (void) interrupt 2 using 0
 {
     // HW auto clear interrupt flag
     st_x1.cnt++;
 }
 
 // T0
-void t0_service (void) interrupt 1 using 2
+void t0_service (void) interrupt 1 using 0
 {
     // HW auto clear interrupt flag
     // Mode 0: 16-bit auto reload
     st_t0.cnt++;
+    TF0=0;
 }
 
 // T1
-void t1_service (void) interrupt 3 using 3
+void t1_service (void) interrupt 3 using 0
 {
     // HW auto clear interrupt flag
     // Mode 0: 16-bit auto reload
