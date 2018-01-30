@@ -3,23 +3,9 @@
 void main (void)
 {
     // init
-#ifdef JOY_SYS_COMPAT
-    LCD_BKL = 0;
-    DelayMs (200);
-    DelayMs (200);
-    DelayMs (200);
-    DelayMs (200);
-    DelayMs (200);
-    LCD_BKL = ~LCD_BKL;
-    DelayMs (200);
-    DelayMs (200);
-    DelayMs (200);
-    DelayMs (200);
-    DelayMs (200);
-    LCD_BKL = ~LCD_BKL;
-#endif
     DelayMs (200);
     sys_init ();
+    LCD_BKL = BKL_ON;
 
     // main
     while (1)

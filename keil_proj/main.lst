@@ -1,4 +1,4 @@
-C51 COMPILER V9.52.0.0   MAIN                                                              01/12/2018 00:37:36 PAGE 1   
+C51 COMPILER V9.52.0.0   MAIN                                                              01/30/2018 23:21:55 PAGE 1   
 
 
 C51 COMPILER V9.52.0.0, COMPILATION OF MODULE MAIN
@@ -13,46 +13,32 @@ line level    source
    3          void main (void)
    4          {
    5   1          // init
-   6   1      #ifdef JOY_SYS_COMPAT
-   7   1          LCD_BKL = 0;
-   8   1          DelayMs (200);
-   9   1          DelayMs (200);
-  10   1          DelayMs (200);
-  11   1          DelayMs (200);
-  12   1          DelayMs (200);
-  13   1          LCD_BKL = ~LCD_BKL;
-  14   1          DelayMs (200);
-  15   1          DelayMs (200);
-  16   1          DelayMs (200);
-  17   1          DelayMs (200);
-  18   1          DelayMs (200);
-  19   1          LCD_BKL = ~LCD_BKL;
-  20   1      #endif
-  21   1          DelayMs (200);
-  22   1          sys_init ();
-  23   1      
-  24   1          // main
-  25   1          while (1)
-  26   1          {
-  27   2              switch (fsm)
-  28   2              {
-  29   3                  case FSM_US01:
-  30   3                      fsm_us01_proc();
-  31   3                      break;
-  32   3                  case FSM_TICK:
-  33   3                      fsm_tick_proc();
-  34   3                      break;
-  35   3                  default:
-  36   3                      fsm_erro_proc();
-  37   3                      break;
-  38   3              }
-  39   2          }
-  40   1      }
-  41          
+   6   1          DelayMs (200);
+   7   1          sys_init ();
+   8   1          LCD_BKL = BKL_ON;
+   9   1      
+  10   1          // main
+  11   1          while (1)
+  12   1          {
+  13   2              switch (fsm)
+  14   2              {
+  15   3                  case FSM_US01:
+  16   3                      fsm_us01_proc();
+  17   3                      break;
+  18   3                  case FSM_TICK:
+  19   3                      fsm_tick_proc();
+  20   3                      break;
+  21   3                  default:
+  22   3                      fsm_erro_proc();
+  23   3                      break;
+  24   3              }
+  25   2          }
+  26   1      }
+  27          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     87    ----
+   CODE SIZE        =     33    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

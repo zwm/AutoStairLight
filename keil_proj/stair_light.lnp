@@ -3,6 +3,5 @@
 "lcd1602.obj",
 "main.obj",
 "mcu.obj",
-"proj_lib.obj",
-"STARTUP.obj" 
+"proj_lib.obj" 
 TO "stair_light" 

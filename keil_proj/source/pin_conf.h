@@ -40,6 +40,8 @@ sbit us0_trig                       =   P3^7;
 sbit us1_trig                       =   P3^4;
 sbit us0_echo                       =   P3^2;
 sbit us1_echo                       =   P3^3;
+sbit photo_sens                     =   P3^0;
+sbit stair_led                      =   P3^0;
 //******************************************************
 
 sbit LCD_BKL    = P3^5;

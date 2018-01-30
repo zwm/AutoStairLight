@@ -49,6 +49,9 @@
 #define INT_MOD_START   0
 #define INT_MOD_STOP    1
 
+#define BKL_ON          0
+#define BKL_OFF         1
+
 typedef struct{
     u8 cnt;
     u8 bak;
@@ -79,6 +82,7 @@ u8 inc_check(STRUCT_INT_CNT *p);
 void sys_init (void);
 void trig_us0 (void);
 void trig_us1 (void);
+void led_light (unsigned char sw);
 void fsm_us01_proc(void);
 void fsm_tick_proc(void);
 void fsm_erro_proc(void);
