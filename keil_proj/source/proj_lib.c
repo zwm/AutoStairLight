@@ -261,8 +261,9 @@ void fsm_tick_proc (void)
         LcdDispChar (16, 0, (st_t0.cnt%100)/10+'0');
         LcdDispChar (17, 0, (st_t0.cnt%100)%10+'0');
 
-        LcdDispChar (16, 1, (st_t0.bak%100)/10+'0');
-        LcdDispChar (17, 1, (st_t0.bak%100)%10+'0');
+        LcdDispChar (16, 1, (SP/100)+'0');
+        LcdDispChar (17, 1, (SP%100)/10+'0');
+        LcdDispChar (18, 1, (SP%100)%10+'0');
 
         if (ET0)
             LcdDispChar (20, 0, '1');
