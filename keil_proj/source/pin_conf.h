@@ -36,12 +36,12 @@ sbit sbit_pin_sht1x_clk             =   P5^4;
 //******************************************************
 
 //******************************************************
-sbit us0_trig                       =   P3^7;
-sbit us1_trig                       =   P3^4;
-sbit us0_echo                       =   P3^2;
-sbit us1_echo                       =   P3^3;
-sbit photo_sens                     =   P3^0;
-sbit stair_led                      =   P3^0;
+sbit us0_trig                       =   P3^7;   // Chaoshengbo Mokuai0 Trig
+sbit us1_trig                       =   P3^4;   // Chaoshengbo Mokuai1 Trig
+sbit us0_echo                       =   P3^2;   // Chaoshengbo Mokuai0 Echo
+sbit us1_echo                       =   P3^3;   // Chaoshengbo Mokuai1 Echo
+sbit photo_sens                     =   P2^2;   // Guanmindianzu Caiyang Shuru
+sbit stair_led                      =   P2^3;   // Loudao deng
 //******************************************************
 
 sbit LCD_BKL    = P3^5;
